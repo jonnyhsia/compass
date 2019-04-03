@@ -21,12 +21,13 @@ class RouteInfo(
 
     val interceptors: List<ClassName>
         get() {
-            // @com.arch.jonnyhsia.compass.api.Route(interceptors=com.arch.jonnyhsia.compass.sample.MainActivity,android.widget.TextView, name=Main)
-            // com.arch.jonnyhsia.compass.sample.MainActivity,android.widget.TextView
-            val s = route.toString()
-            val start = s.indexOf("interceptors=") + "interceptors=".length
-            // 特别留意代码修改之后是否还是 name
-            val end = s.indexOf(", name")
+            // com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor
+            // @com.arch.jonnyhsia.compass.api.Route(requestCode=11, interceptors=com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor, scheme=, name=sample://Subscribe)
+            val s = route.toString().substringAfter("interceptors=")
+            // com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor, scheme=, name=sample://Subscribe)
+            val start = 0
+            // com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor
+            val end = s.indexOf(", ")
             if (start == end) {
                 return emptyList()
             }
