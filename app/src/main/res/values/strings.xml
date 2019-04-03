@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Compass</string>
+    <string name="detail">详情页(id=%d)</string>
+    <string name="home_page">首页</string>
+    <string name="go_detail_button_text">详情页(传参100)</string>
+    <string name="go_members_only_button_text">去会员专享(需要登录)</string>
 </resources>

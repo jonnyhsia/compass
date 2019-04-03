@@ -3,9 +3,11 @@ package com.arch.jonnyhsia.compass
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.arch.jonnyhsia.compass.api.CompassPage
+import com.arch.jonnyhsia.compass.api.PageKey
 import com.arch.jonnyhsia.compass.interceptor.RouteInterceptor
 import com.arch.jonnyhsia.compass.interceptor.SchemeInterceptor
 import com.arch.jonnyhsia.compass.interceptor.UnregisterPageHandler
@@ -17,7 +19,7 @@ object Compass {
 
     private val initialized = AtomicBoolean(false)
 
-    private lateinit var routePages: Map<String, CompassPage>
+    private lateinit var routePages: Map<PageKey, CompassPage>
 
     private var schemeInterceptor: SchemeInterceptor? = null
     private var pageHandler: UnregisterPageHandler? = null
@@ -28,20 +30,30 @@ object Compass {
      */
     @JvmStatic
     @Synchronized
-    fun initialize(pages: MutableMap<String, CompassPage>) {
+    fun initialize(pages: MutableMap<PageKey, CompassPage>) {
         if (initialized.compareAndSet(false, true)) {
             routePages = HashMap(pages)
         }
     }
 
     @JvmStatic
-    fun navigate(context: Context, routeIntent: RouteIntent) {
-        internalNavigate(context, routeIntent)
+    fun navigate(context: Context, url: String): RouteIntent {
+        return ProcessableIntent(context, url)
     }
 
     @JvmStatic
-    fun navigate(fragment: Fragment, routeIntent: RouteIntent) {
-        internalNavigate(fragment, routeIntent)
+    fun navigate(fragment: Fragment, url: String): RouteIntent {
+        return ProcessableIntent(fragment, url)
+    }
+
+    @JvmStatic
+    fun navigate(context: Context, uri: Uri): RouteIntent {
+        return ProcessableIntent(context, uri)
+    }
+
+    @JvmStatic
+    fun navigate(fragment: Fragment, uri: Uri): RouteIntent {
+        return ProcessableIntent(fragment, uri)
     }
 
     @JvmStatic
@@ -59,14 +71,15 @@ object Compass {
         routeInterceptors.add(interceptor)
     }
 
+    /**
+     * 验证是否有存在的 Page
+     */
     @JvmStatic
-    fun validatePageKey(key: String?): Boolean {
-        key ?: return false
+    fun validatePageKey(key: PageKey): Boolean {
         return routePages.containsKey(key)
     }
 
-    private fun internalNavigate(context: Any, routeIntent: RouteIntent): Boolean {
-        routeIntent.requester = context.toString()
+    internal fun internalNavigate(context: Any, routeIntent: ProcessableIntent): Boolean {
         // 判断协议拦截 (拦截非原生页, 页面升级等)
         schemeInterceptor?.intercept(routeIntent)
 
@@ -102,9 +115,9 @@ object Compass {
     }
 
     private fun performNavigate(
-            context: Any,
-            page: CompassPage,
-            routeIntent: RouteIntent
+        context: Any,
+        page: CompassPage,
+        routeIntent: ProcessableIntent
     ) {
         val activity = context.asActivity()
         val intent = Intent(activity, page.target)
@@ -139,10 +152,6 @@ object Compass {
             if (i != null) {
                 definedInterceptorInstanceList.add(i)
             }
-//            if (interceptorInstanceList[index]::class == clz) {
-//                definedInterceptorInstanceList.add(interceptorInstanceList[index])
-//                interceptorInstanceList.removeAt(index)
-//            }
         }
 
         return definedInterceptorInstanceList

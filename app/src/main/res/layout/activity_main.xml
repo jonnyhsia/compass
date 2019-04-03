@@ -12,7 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="首页"
+        android:text="@string/home_page"
         android:textColor="@android:color/black"
         android:textSize="16sp" />
 
@@ -21,13 +21,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="详情页" />
+        android:text="@string/go_detail_button_text" />
 
     <Button
         android:id="@+id/btnGoMembersOnly"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:text="去会员专享(需要登录)" />
+        android:text="@string/go_members_only_button_text" />
 
 </LinearLayout>

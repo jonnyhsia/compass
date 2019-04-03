@@ -1,6 +1,6 @@
 package com.arch.jonnyhsia.compass.interceptor
 
-import com.arch.jonnyhsia.compass.RouteIntent
+import com.arch.jonnyhsia.compass.ProcessableIntent
 
 
 /**
@@ -10,7 +10,7 @@ import com.arch.jonnyhsia.compass.RouteIntent
  * 主要用于内嵌页与内嵌页的升级(跳转内嵌页, 或对应原生页)
  */
 interface SchemeInterceptor {
-    fun intercept(intent: RouteIntent)
+    fun intercept(intent: ProcessableIntent)
 }
 
 /**
@@ -21,7 +21,7 @@ interface SchemeInterceptor {
  * 与降级(无法兼容的原生页, 跳转到指定页)
  */
 interface UnregisterPageHandler {
-    fun handleUri(intent: RouteIntent)
+    fun handleUri(intent: ProcessableIntent)
 }
 
 /**
@@ -31,5 +31,5 @@ interface UnregisterPageHandler {
  * 主要用于用户登录等条件拦截, 跳转到其他页面
  */
 interface RouteInterceptor {
-    fun intercept(intent: RouteIntent)
+    fun intercept(intent: ProcessableIntent)
 }

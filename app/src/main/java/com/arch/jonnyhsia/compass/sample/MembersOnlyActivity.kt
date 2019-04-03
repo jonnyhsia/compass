@@ -5,7 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.arch.jonnyhsia.compass.api.Route
 import com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor
 
-@Route(name = "sample://MembersOnly", interceptors = [XLoginInterceptor::class])
+@Route(name = "MembersOnly", interceptors = [XLoginInterceptor::class])
 class MembersOnlyActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

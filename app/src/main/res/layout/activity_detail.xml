@@ -6,11 +6,12 @@
     tools:context=".DetailActivity">
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="详情页"
         android:textColor="@android:color/black"
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        tools:text="@string/detail" />
 
 </FrameLayout>

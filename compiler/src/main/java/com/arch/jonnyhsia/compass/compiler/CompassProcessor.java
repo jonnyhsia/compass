@@ -1,31 +1,55 @@
 package com.arch.jonnyhsia.compass.compiler;
 
 import com.arch.jonnyhsia.compass.api.CompassPage;
+import com.arch.jonnyhsia.compass.api.PageKey;
 import com.arch.jonnyhsia.compass.api.Route;
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 
-import javax.annotation.processing.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
-import java.io.IOException;
-import java.util.*;
 
 @AutoService(Processor.class)
 public class CompassProcessor extends AbstractProcessor {
 
+    private final static String TABLE_PKG_NAME = "COMPASS_TABLE_PKG_NAME";
+    private final static String DEFAULT_SCHEME = "DEFAULT_PAGE_SCHEME";
+
     private Filer filer;
     private Messager messager;
+
+    private String tablePackage;
+    private String defaultScheme;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
         filer = processingEnvironment.getFiler();
         messager = processingEnvironment.getMessager();
+
+        tablePackage = processingEnvironment.getOptions().get(TABLE_PKG_NAME);
+        defaultScheme = processingEnvironment.getOptions().get(DEFAULT_SCHEME);
     }
 
     @Override
@@ -60,7 +84,7 @@ public class CompassProcessor extends AbstractProcessor {
 
     private void generateJavaCode(List<RouteInfo> routeInfoList) throws IOException {
         // List<CompassPage>
-        ParameterizedTypeName pageListType = ParameterizedTypeName.get(HashMap.class, String.class, CompassPage.class);
+        ParameterizedTypeName pageListType = ParameterizedTypeName.get(HashMap.class, PageKey.class, CompassPage.class);
         // public static List addPages() {}
         MethodSpec.Builder addPageMethod = MethodSpec.methodBuilder("getPages")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -70,8 +94,8 @@ public class CompassProcessor extends AbstractProcessor {
         // list.add(new CompassPage(scheme, name, clz[]))
         for (RouteInfo routeInfo : routeInfoList) {
             addPageMethod.addComment(routeInfo.getRouteString());
-            addPageMethod.addCode("map.put($S, new $T($S, $T.class, $L",
-                    routeInfo.getName(),
+            addPageMethod.addCode("map.put(new $T($S, $S), new $T($S, $T.class, $L",
+                    PageKey.class, pageScheme(routeInfo.getScheme()), routeInfo.getName(),
                     CompassPage.class, routeInfo.getName(), routeInfo.getTarget(), routeInfo.getRequestCode());
 
             if (routeInfo.getInterceptors().size() == 0) {
@@ -100,8 +124,16 @@ public class CompassProcessor extends AbstractProcessor {
                 .build();
 
         // com.arch.jonnyhsia.compass.CompassTable
-        JavaFile javaFile = JavaFile.builder("com.arch.jonnyhsia.compass", tableClass).build();
+        JavaFile javaFile = JavaFile.builder(tablePackage(), tableClass).build();
         javaFile.writeTo(filer);
+    }
+
+    private String tablePackage() {
+        return tablePackage != null ? tablePackage : "com.arch.jonnyhsia.compass";
+    }
+
+    private String pageScheme(String scheme){
+        return scheme.isEmpty() ? defaultScheme : scheme;
     }
 
     private void note(String format, Object... args) {

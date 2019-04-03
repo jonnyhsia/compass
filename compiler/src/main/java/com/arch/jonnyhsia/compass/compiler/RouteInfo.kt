@@ -42,4 +42,6 @@ class RouteInfo(
     val requestCode: Int
         get() = route.requestCode
 
+    val scheme: String
+        get() = route.scheme
 }
