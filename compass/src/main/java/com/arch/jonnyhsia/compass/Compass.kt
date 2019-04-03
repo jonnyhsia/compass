@@ -1,7 +1,6 @@
 package com.arch.jonnyhsia.compass
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.app.ActivityCompat
@@ -37,23 +36,13 @@ object Compass {
     }
 
     @JvmStatic
-    fun navigate(context: Context, url: String): RouteIntent {
-        return ProcessableIntent(context, url)
+    fun navigate(url: String): RouteIntent {
+        return ProcessableIntent(url)
     }
 
     @JvmStatic
-    fun navigate(fragment: Fragment, url: String): RouteIntent {
-        return ProcessableIntent(fragment, url)
-    }
-
-    @JvmStatic
-    fun navigate(context: Context, uri: Uri): RouteIntent {
-        return ProcessableIntent(context, uri)
-    }
-
-    @JvmStatic
-    fun navigate(fragment: Fragment, uri: Uri): RouteIntent {
-        return ProcessableIntent(fragment, uri)
+    fun navigate(uri: Uri): RouteIntent {
+        return ProcessableIntent(uri)
     }
 
     @JvmStatic

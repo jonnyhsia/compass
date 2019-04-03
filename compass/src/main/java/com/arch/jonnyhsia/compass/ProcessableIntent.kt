@@ -1,8 +1,10 @@
 package com.arch.jonnyhsia.compass
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.fragment.app.Fragment
 import com.arch.jonnyhsia.compass.api.PageKey
 
 interface RouteIntent {
@@ -11,15 +13,17 @@ interface RouteIntent {
     fun addParameter(key: String, parcelable: Parcelable): RouteIntent
     fun addParameters(bundle: Bundle): RouteIntent
     fun removeAllParameters(): RouteIntent
-    fun go()
+    fun go(context: Context)
+    fun go(fragment: Fragment)
 }
 
 class ProcessableIntent internal constructor(
-    private val context: Any,
     uri: Uri
 ) : RouteIntent {
 
-    internal constructor(context: Any, url: String) : this(context, Uri.parse(url))
+    private lateinit var context: Any
+
+    internal constructor(url: String) : this(Uri.parse(url))
 
     var uri: Uri = uri
         private set
@@ -81,7 +85,16 @@ class ProcessableIntent internal constructor(
         return this
     }
 
-    override fun go() {
+    override fun go(context: Context) {
+        internalGo(context)
+    }
+
+    override fun go(fragment: Fragment) {
+        internalGo(fragment)
+    }
+
+    private fun internalGo(any: Any) {
+        this.context = any
         Compass.internalNavigate(context, this)
     }
 

@@ -1,0 +1,54 @@
+apply plugin: 'maven'
+
+def localMavenRepo = 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+
+// used "repositoryRelease, repositorySnapshot, username, password"
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.groupId = 'com.arch.jonnyhsia'
+            pom.artifactId = 'compass-api'
+            pom.version = rootProject.pomVersion
+
+            if (Boolean.parseBoolean(uploadLocal)) {
+                // upload to local
+                repository(url: localMavenRepo)
+            } else {
+                // upload to remote
+                def username = localProperties['username']
+                def password = localProperties['password']
+
+                if (rootProject.stable) {
+                    repository(url: localProperties['repositoryRelease']) {
+                        authentication(userName: username, password: password)
+                    }
+                } else {
+                    repository(url: localProperties['repositorySnapshot']) {
+                        authentication(userName: username, password: password)
+                    }
+                }
+            }
+
+            pom.project {
+                licenses {
+                    license {
+                        name 'JonnyHsia, all right reserved'
+                        url 'https://github.com/jonnyhsia'
+                    }
+                }
+            }
+        }
+    }
+}

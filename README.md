@@ -31,15 +31,15 @@ class DetailActivity : Activity()
 
 ```kotlin
 // 在 Application 中初始化，手动添加路由表
-Compass.initialize(CompassTable.getPages()
+Compass.initialize(CompassTable.getPages())
 ```
 
 ### 3. 跳转页面
 
 通过一个 Activity 或 Fragment 以及页面的路径即可进行简单的跳转：
 ```kotlin
-Compass.navigate(activity, "scheme://name").go()
-Compass.navigate(fragment, "scheme://name").go()
+Compass.navigate("scheme://name").go(activity)
+Compass.navigate("scheme://name").go(fragment)
 ```
 此外提供了对应的拓展方法，以更简洁地调用
 ```kotlin
@@ -48,9 +48,9 @@ activityOrFragment.navigate("scheme://name")
 可以为跳转添加参数
 ```kotlin
 // XXXActivity.kt
-Compass.navigate(this, "sample://ArticleDetail")
+Compass.navigate("sample://ArticleDetail")
     .addParameter("id", articleId)
-    .go()
+    .go(this)
     
 // 或者使用拓展方法
 navigate("sample://ArticleDetail") {
