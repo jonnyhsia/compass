@@ -6,12 +6,18 @@
 
 ## 开始上手
 
-暂未上传至远程 Maven 仓库。另外，项目代码基于 [AndroidX](https://developer.android.com/jetpack/androidx/)，暂时没有兼容 [Support Library](https://developer.android.com/topic/libraries/support-library/index) 的计划。
+暂未上传至远程 Maven 仓库。可 clone 项目最新代码后, 依次将 `api`, `compiler`, `compass` 上传至你的私有 maven 仓库中。
+还可以设置 `uploadLocal=true` 以提交到本地 maven 仓库)
+
+需要注意的是, 在上传 `compiler` 与 `compass` 时, 需要把对 `api` 的 module dependency 改为 library dependency (在 `build.gradle` 中有注释).
+
+另外，项目代码基于 [AndroidX](https://developer.android.com/jetpack/androidx/)，暂时没有兼容 [Support Library](https://developer.android.com/topic/libraries/support-library/index) 的计划。
+
 ```groovy
 dependencies {
-  implementation 'com.arch.jonnyhsia:compass:1.0.0-SNAPSHOT'
+  implementation "com.arch.jonnyhsia:compass:$pomVersion"
   // If you don't use kotlin, replace kapt with annotationProcessor
-  kapt 'com.arch.jonnyhsia:compass-compiler:1.0.0-SNAPSHOT'
+  kapt "com.arch.jonnyhsia:compass-compiler:$pomVersion"
 }
 ```
 

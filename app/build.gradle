@@ -9,8 +9,8 @@ android {
         applicationId "com.arch.jonnyhsia.compass.sample"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode rootProject.versionCode
+        versionName rootProject.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
 //        javaCompileOptions {
