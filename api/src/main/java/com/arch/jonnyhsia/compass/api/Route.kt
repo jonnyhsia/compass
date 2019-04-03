@@ -8,5 +8,5 @@ annotation class Route(
     val scheme: String = "",
     val name: String,
     val interceptors: Array<KClass<*>> = [],
-    val requestCode: Int = 0
+    val requestCode: Int = -1
 )

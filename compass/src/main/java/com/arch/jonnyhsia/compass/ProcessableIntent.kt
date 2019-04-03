@@ -9,7 +9,7 @@ interface RouteIntent {
     fun addParameter(key: String, value: String?): RouteIntent
     fun addParameter(key: String, value: Int): RouteIntent
     fun addParameter(key: String, parcelable: Parcelable): RouteIntent
-    fun addParameter(bundle: Bundle): RouteIntent
+    fun addParameters(bundle: Bundle): RouteIntent
     fun removeAllParameters(): RouteIntent
     fun go()
 }
@@ -49,9 +49,9 @@ class ProcessableIntent internal constructor(
         return this
     }
 
-    override fun addParameter(bundle: Bundle): RouteIntent {
+    override fun addParameters(bundle: Bundle): RouteIntent {
         if (innerBundle == null) {
-            innerBundle = bundle
+            innerBundle = Bundle(bundle)
         } else {
             innerBundle!!.putAll(bundle)
         }

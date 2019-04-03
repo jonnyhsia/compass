@@ -9,9 +9,9 @@ object XLoginInterceptor : RouteInterceptor {
         if (!App.INSTANCE.isLogin) {
             val pendingUri = intent.uri
             intent.redirect("*://Login")
-                    .removeAllParameters()
-                    .addParameter("entry", intent.requester)
-                    .addParameter("pending", pendingUri)
+                .removeAllParameters()
+                .addParameter("entry", intent.requester)
+                .addParameter("pending", pendingUri)
         }
     }
 }

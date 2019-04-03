@@ -23,8 +23,7 @@ object XSchemeInterceptor : SchemeInterceptor {
                 }
             }
 
-            intent.redirect("core://Web")
-                .addParameter("url", intent.uri.toString())
+            intent.redirect("core://Web").addParameter("url", intent.uri)
         }
     }
 }

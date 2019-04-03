@@ -4,31 +4,17 @@ import com.arch.jonnyhsia.compass.api.CompassPage;
 import com.arch.jonnyhsia.compass.api.PageKey;
 import com.arch.jonnyhsia.compass.api.Route;
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.Filer;
-import javax.annotation.processing.Messager;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.Processor;
-import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
+import java.io.IOException;
+import java.util.*;
 
 @AutoService(Processor.class)
 public class CompassProcessor extends AbstractProcessor {
@@ -132,8 +118,8 @@ public class CompassProcessor extends AbstractProcessor {
         return tablePackage != null ? tablePackage : "com.arch.jonnyhsia.compass";
     }
 
-    private String pageScheme(String scheme){
-        return scheme.isEmpty() ? defaultScheme : scheme;
+    private String pageScheme(String scheme) {
+        return scheme.isEmpty() ? (defaultScheme.isEmpty() ? "compass" : defaultScheme) : scheme;
     }
 
     private void note(String format, Object... args) {
