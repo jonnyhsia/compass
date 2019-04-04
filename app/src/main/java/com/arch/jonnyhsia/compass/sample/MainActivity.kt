@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnGoMembersOnly.setOnClickListener {
-            Compass.navigate(this, "sample://MembersOnly").go()
+            Compass.navigate("sample://MembersOnly").go(this)
         }
     }
 }

@@ -1,13 +1,14 @@
 # Compass
 
 	WARNING:
-	这是一个练手性质的、功能不完善的、设计存在缺陷的、API 极其不稳定的、随时可能提交破坏性更新的……页面路由框架。
+	这是一个练手性质的、功能不完善的、设计存在缺陷的、API 极其不稳定的、
+	随时可能提交破坏性更新的……页面路由框架。
 	通过注解将 Activity 注册到统一的路由表中，解耦模块间的页面跳转。
 
 ## 开始上手
 
-暂未上传至远程 Maven 仓库。可 clone 项目最新代码后, 依次将 `api`, `compiler`, `compass` 上传至你的私有 maven 仓库中。
-还可以设置 `uploadLocal=true` 以提交到本地 maven 仓库
+暂未上传至远程 Maven 仓库。可 clone 项目最新代码后, 依次将 `api`, `compiler`, `compass` 上传至你的私有 Maven 仓库中。
+还可以设置 `uploadLocal=true` 以提交到本地 Maven 仓库
 
 需要注意的是, 在上传 `compiler` 与 `compass` 时, 需要把对 `api` 的 module dependency 改为 library dependency (在 `build.gradle` 中有注释).
 

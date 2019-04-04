@@ -8,7 +8,11 @@ import com.arch.jonnyhsia.compass.sample.interceptor.XMemberInterceptor
 
 const val REQUEST_SUBSCRIBE = 11
 
-@Route(name = "Subscribe", interceptors = [XLoginInterceptor::class, XMemberInterceptor::class], requestCode = REQUEST_SUBSCRIBE)
+@Route(
+    name = "Subscribe",
+    interceptors = [XLoginInterceptor::class, XMemberInterceptor::class],
+    requestCode = REQUEST_SUBSCRIBE
+)
 class SubscribeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
