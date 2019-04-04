@@ -33,12 +33,12 @@ class DetailActivity : Activity()
 
 ### 2. Rebuild 项目，并导入路由表
 
-当没有 `Route` 注解时不会生成路由表，因此需要先声明注解后编译 (后续改进)。
-最好是能自动加载路由表，暂时没想好，后续会尽可能实现。
+当没有 `Route` 注解时不会生成路由表，因此需要先声明注解后编译。
+最好是能自动或隐式加载路由表，暂时没想好，后续会尽可能实现。
 
 ```kotlin
 // 在 Application 中初始化，手动添加路由表
-Compass.initialize(CompassTable.getPages())
+Compass.initialize(CompassTable())
 ```
 
 ### 3. 跳转页面
@@ -126,7 +126,7 @@ class XxxActivity: Activity()
 ### +. 自定义路由表包名与默认 Scheme
 
 路由表所在包名默认为 `com.arch.jonnyhsia.compass`, 可以在 `build.gradle` 中为其添加参数。
-Scheme 同样通过添加相应参数实现自定义缺省值，默认为 `compass`
+Scheme 同样通过添加相应参数实现自定义缺省值，默认为 `app`
 
 ```groovy
 kapt {

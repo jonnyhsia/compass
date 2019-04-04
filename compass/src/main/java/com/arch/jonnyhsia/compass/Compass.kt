@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.arch.jonnyhsia.compass.api.CompassPage
+import com.arch.jonnyhsia.compass.api.ICompassTable
 import com.arch.jonnyhsia.compass.api.PageKey
 import com.arch.jonnyhsia.compass.interceptor.RouteInterceptor
 import com.arch.jonnyhsia.compass.interceptor.SchemeInterceptor
@@ -29,9 +30,9 @@ object Compass {
      */
     @JvmStatic
     @Synchronized
-    fun initialize(pages: MutableMap<PageKey, CompassPage>) {
+    fun initialize(table: ICompassTable) {
         if (initialized.compareAndSet(false, true)) {
-            routePages = HashMap(pages)
+            routePages = HashMap(table.getPages())
         }
     }
 

@@ -1,6 +1,7 @@
 package com.arch.jonnyhsia.compass.compiler;
 
 import com.arch.jonnyhsia.compass.api.CompassPage;
+import com.arch.jonnyhsia.compass.api.ICompassTable;
 import com.arch.jonnyhsia.compass.api.PageKey;
 import com.arch.jonnyhsia.compass.api.Route;
 import com.google.auto.service.AutoService;
@@ -19,14 +20,17 @@ import java.util.*;
 @AutoService(Processor.class)
 public class CompassProcessor extends AbstractProcessor {
 
-    private final static String TABLE_PKG_NAME = "COMPASS_TABLE_PKG_NAME";
-    private final static String DEFAULT_SCHEME = "DEFAULT_PAGE_SCHEME";
+    private final static String TABLE_FULL_PATH = "compassTable";
+    private final static String DEFAULT_SCHEME = "compassDefaultPageScheme";
 
     private Filer filer;
     private Messager messager;
 
     private String tablePackage;
+    private String tableName;
     private String defaultScheme;
+
+    private int round = 0;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -34,19 +38,37 @@ public class CompassProcessor extends AbstractProcessor {
         filer = processingEnvironment.getFiler();
         messager = processingEnvironment.getMessager();
 
-        tablePackage = processingEnvironment.getOptions().get(TABLE_PKG_NAME);
-        defaultScheme = processingEnvironment.getOptions().get(DEFAULT_SCHEME);
+        final String tableFullName = processingEnvironment.getOptions().get(TABLE_FULL_PATH);
+        if (tableFullName != null && !tableFullName.isEmpty()) {
+            final int indexOfLastPeriod = tableFullName.lastIndexOf(".");
+            tablePackage = tableFullName.substring(0, indexOfLastPeriod);
+            tableName = tableFullName.substring(indexOfLastPeriod + 1);
+        } else {
+            tablePackage = "com.arch.jonnyhsia.compass";
+            tableName = "CompassTable";
+        }
+
+        final String scheme = processingEnvironment.getOptions().get(DEFAULT_SCHEME);
+        if (scheme != null && !scheme.isEmpty()) {
+            defaultScheme = scheme;
+        } else {
+            defaultScheme = "app";
+        }
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
         try {
             note("Hello from the other side...");
+            // 跳过重复执行的 process
             if (annotations == null || annotations.isEmpty()) {
-                // 跳过重复执行的 process
-                note("No Annotations... Annotation Process Skipped.");
+                note("No Annotations... Generate an empty table.");
                 return true;
             }
+            if (round > 0) {
+                return false;
+            }
+            round++;
 
             List<RouteInfo> routeInfoList = new ArrayList<>();
             for (Element annotatedElement : roundEnvironment.getElementsAnnotatedWith(Route.class)) {
@@ -69,15 +91,20 @@ public class CompassProcessor extends AbstractProcessor {
     }
 
     private void generateJavaCode(List<RouteInfo> routeInfoList) throws IOException {
-        // List<CompassPage>
-        ParameterizedTypeName pageListType = ParameterizedTypeName.get(HashMap.class, PageKey.class, CompassPage.class);
-        // public static List addPages() {}
-        MethodSpec.Builder addPageMethod = MethodSpec.methodBuilder("getPages")
-                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(pageListType)
-                .addStatement("$T map = new $T<>()", pageListType, HashMap.class);
+        // HashMap<PageKey, CompassPage>
+        ParameterizedTypeName pageMapType = ParameterizedTypeName.get(HashMap.class, PageKey.class, CompassPage.class);
+        // private final static HashMap pages = loadPages();
+        FieldSpec.Builder pagesField = FieldSpec.builder(pageMapType, "pages", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
+                .initializer("loadPages()");
 
-        // list.add(new CompassPage(scheme, name, clz[]))
+        // private final static Map loadPages()
+        // HashMap map = new HashMap()
+        MethodSpec.Builder addPageMethod = MethodSpec.methodBuilder("loadPages")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .returns(pageMapType)
+                .addStatement("$T map = new $T<>()", pageMapType, HashMap.class);
+
+        // map.put(PageKey, CompassPage)
         for (RouteInfo routeInfo : routeInfoList) {
             addPageMethod.addComment(routeInfo.getRouteString());
             addPageMethod.addCode("map.put(new $T($S, $S), new $T($S, $T.class, $L",
@@ -100,26 +127,32 @@ public class CompassProcessor extends AbstractProcessor {
 
             addPageMethod.addStatement("));");
         }
-        // return list
+        // return map
         addPageMethod.addStatement("return map");
 
-        // public final class CompassTable { addPages() }
-        TypeSpec tableClass = TypeSpec.classBuilder("CompassTable")
+        // public final HashMap getPages() { return pages; }
+        MethodSpec.Builder getPagesMethod = MethodSpec.methodBuilder("getPages")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addAnnotation(Override.class)
+                .returns(pageMapType)
+                .addStatement("return pages");
+
+        // public final class XXX { }
+        TypeSpec tableClass = TypeSpec.classBuilder(tableName)
+                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
+                .addSuperinterface(ICompassTable.class)
+                .addField(pagesField.build())
                 .addMethod(addPageMethod.build())
+                .addMethod(getPagesMethod.build())
                 .build();
 
-        // com.arch.jonnyhsia.compass.CompassTable
-        JavaFile javaFile = JavaFile.builder(tablePackage(), tableClass).build();
+        // com.arch.jonnyhsia.compass.XXX
+        JavaFile javaFile = JavaFile.builder(tablePackage, tableClass).build();
         javaFile.writeTo(filer);
     }
 
-    private String tablePackage() {
-        return tablePackage != null ? tablePackage : "com.arch.jonnyhsia.compass";
-    }
-
     private String pageScheme(String scheme) {
-        return scheme.isEmpty() ? (defaultScheme.isEmpty() ? "compass" : defaultScheme) : scheme;
+        return scheme.isEmpty() ? defaultScheme : scheme;
     }
 
     private void note(String format, Object... args) {

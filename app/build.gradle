@@ -32,8 +32,8 @@ android {
 
 kapt {
     arguments {
-        arg("COMPASS_TABLE_PKG_NAME", "com.arch.jonnyhsia.compass.sample")
-        arg("DEFAULT_PAGE_SCHEME", "sample")
+        arg("compassTable", "com.arch.jonnyhsia.compass.sample.SampleTable")
+        arg("compassDefaultPageScheme", "sample")
     }
 }
 
