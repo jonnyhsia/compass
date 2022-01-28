@@ -35,7 +35,7 @@ class ProcessableIntent internal constructor(
         private set
 
     val pageKey: PageKey
-        get() = PageKey(uri.scheme, uri.host)
+        get() = PageKey(uri.scheme, uri.host!!)
 
     val requester: String
         get() = context.toString()

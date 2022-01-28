@@ -1,7 +1,7 @@
 package com.arch.jonnyhsia.compass.api
 
 class PageKey(
-    val scheme: String,
+    val scheme: String?,
     val name: String
 ) {
 

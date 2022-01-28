@@ -3,6 +3,10 @@ apply plugin: 'kotlin'
 apply plugin: 'kotlin-kapt'
 apply from: './upload-compiler.gradle'
 
+sourceSets {
+    main.java.srcDirs += 'src/main'
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.google.auto.service:auto-service:1.0-rc2'
@@ -12,7 +16,7 @@ dependencies {
     implementation 'com.squareup:javapoet:1.10.0'
 
     implementation project(':api')
-    // implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
+//    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
 }
 
 sourceCompatibility = "7"
