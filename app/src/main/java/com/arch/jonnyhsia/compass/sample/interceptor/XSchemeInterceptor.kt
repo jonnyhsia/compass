@@ -15,7 +15,7 @@ object XSchemeInterceptor : SchemeInterceptor {
             val nativePage: String? = intent.uri.getQueryParameter("native_page")
             if (nativePage != null) {
                 val uri = Uri.parse(nativePage)
-                val pageKey = PageKey(uri.scheme, uri.host)
+                val pageKey = PageKey(uri.scheme, uri.host!!)
                 // 如果页面能升级, 则前往对应原生页
                 if (Compass.validatePageKey(pageKey)) {
                     intent.redirect(nativePage)

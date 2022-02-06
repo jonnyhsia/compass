@@ -4,7 +4,6 @@ import com.arch.jonnyhsia.compass.api.CompassPage;
 import com.arch.jonnyhsia.compass.api.ICompassTable;
 import com.arch.jonnyhsia.compass.api.PageKey;
 import com.arch.jonnyhsia.compass.api.Route;
-import com.google.auto.service.AutoService;
 import com.squareup.javapoet.*;
 
 import javax.annotation.processing.*;
@@ -17,7 +16,6 @@ import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.util.*;
 
-@AutoService(Processor.class)
 public class CompassProcessor extends AbstractProcessor {
 
     private final static String TABLE_FULL_PATH = "compassTable";

@@ -1,26 +1,21 @@
+plugins {
+    id("com.google.devtools.ksp").version("1.6.10-1.0.2")
+}
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
     defaultConfig {
         applicationId "com.arch.jonnyhsia.compass.sample"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode rootProject.versionCode
         versionName rootProject.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-//        javaCompileOptions {
-//            annotationProcessorOptions {
-//                arguments = [
-//                        COMPASS_TABLE_PKG_NAME: applicationId,
-//                        DEFAULT_PAGE_SCHEME: "sample"
-//                ]
-//            }
-//        }
     }
     buildTypes {
         release {
@@ -34,11 +29,9 @@ android {
     }
 }
 
-kapt {
-    arguments {
-        arg("compassTable", "com.arch.jonnyhsia.compass.sample.SampleTable")
-        arg("compassDefaultPageScheme", "sample")
-    }
+ksp {
+    arg("compassTable", "com.arch.jonnyhsia.compass.sample.SampleTable")
+    arg("compassDefaultPageScheme", "sample")
 }
 
 dependencies {
@@ -47,9 +40,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
 
     implementation project(':compass')
-    kapt project(':compiler')
-
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation project(path: ':test-processor')
+    ksp project(':compiler')
+    ksp project(':test-processor')
 }
