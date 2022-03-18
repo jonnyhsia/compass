@@ -21,6 +21,19 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            sourceSets {
+                main {
+                    it.java.srcDir(new File("build/generated/ksp/release/kotlin"))
+                }
+            }
+        }
+        debug {
+            sourceSets {
+                main {
+                    it.java.srcDir(new File("build/generated/ksp/debug/kotlin"))
+                }
+            }
         }
     }
     compileOptions {
@@ -30,7 +43,7 @@ android {
 }
 
 ksp {
-    arg("compassTable", "com.arch.jonnyhsia.compass.sample.SampleTable")
+    arg("compassTable", "com.arch.jonnyhsia.compass.SampleTable")
     arg("compassDefaultPageScheme", "sample")
 }
 
@@ -40,7 +53,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.0.2'
 
     implementation project(':compass')
-    implementation project(path: ':test-processor')
+//    implementation project(path: ':test-processor')
     ksp project(':compiler')
-    ksp project(':test-processor')
+//    ksp project(':test-processor')
 }

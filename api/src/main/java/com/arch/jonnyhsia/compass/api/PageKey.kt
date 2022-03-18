@@ -17,7 +17,9 @@ class PageKey(
             // scheme 不同且皆非通配符, 返回 false
             if (other.scheme != this.scheme &&
                 other.scheme != "*" &&
-                this.scheme != "*"
+                this.scheme != "*" &&
+                other.scheme != "" &&
+                this.scheme != ""
             ) {
                 return false
             }

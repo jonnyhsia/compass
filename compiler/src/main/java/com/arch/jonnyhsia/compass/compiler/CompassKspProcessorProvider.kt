@@ -8,6 +8,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 @KspExperimental
 class CompassKspProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+        environment.logger.info("Start creating compass ksp processor...")
         return CompassKspProcessor(environment)
     }
 }

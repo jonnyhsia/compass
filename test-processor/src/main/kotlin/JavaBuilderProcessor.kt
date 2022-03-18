@@ -1,5 +1,6 @@
 import com.example.annotation.Builder
 import com.squareup.javapoet.*
+import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -8,6 +9,7 @@ import javax.lang.model.element.Modifier
 import javax.lang.model.element.PackageElement
 import javax.lang.model.element.TypeElement
 
+@Suppress("DEPRECATION")
 class JavaBuilderProcessor : AbstractProcessor() {
 
     override fun getSupportedSourceVersion(): SourceVersion {
@@ -27,7 +29,7 @@ class JavaBuilderProcessor : AbstractProcessor() {
             typeSpecBuilder.addField(ClassName.get(it.asType()), it.simpleName.toString(), Modifier.PRIVATE)
             val parameterSpec = ParameterSpec.builder(ClassName.get(it.asType()), it.simpleName.toString()).build()
             typeSpecBuilder.addMethod(
-                    MethodSpec.methodBuilder("with${it.simpleName.toString().capitalize()}")
+                    MethodSpec.methodBuilder("with${it.simpleName.toString().capitalize(Locale.getDefault())}")
                             .addParameter(parameterSpec)
                             .addModifiers(Modifier.PUBLIC)
                             .addStatement("this.\$N = \$N", it.simpleName, it.simpleName)

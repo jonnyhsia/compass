@@ -2,6 +2,7 @@ package com.arch.jonnyhsia.compass.sample
 
 import android.app.Application
 import com.arch.jonnyhsia.compass.Compass
+import com.arch.jonnyhsia.compass.SampleTable
 import com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor
 import com.arch.jonnyhsia.compass.sample.interceptor.XMemberInterceptor
 import com.arch.jonnyhsia.compass.sample.interceptor.XSchemeInterceptor
@@ -20,7 +21,7 @@ class App : Application() {
 
     private fun setupRouter() {
         Compass.run {
-//            initialize(SampleTable())
+            initialize(SampleTable())
             // 设置协议拦截器
             setSchemeInterceptor(XSchemeInterceptor)
             // 404 处理
