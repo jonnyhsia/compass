@@ -8,12 +8,12 @@ import androidx.fragment.app.Fragment
 import com.arch.jonnyhsia.compass.api.CompassPage
 import com.arch.jonnyhsia.compass.api.ICompassTable
 import com.arch.jonnyhsia.compass.api.PageKey
+import com.arch.jonnyhsia.compass.api.TargetType
 import com.arch.jonnyhsia.compass.interceptor.RouteInterceptor
 import com.arch.jonnyhsia.compass.interceptor.SchemeInterceptor
 import com.arch.jonnyhsia.compass.interceptor.UnregisterPageHandler
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.collections.ArrayList
 
 object Compass {
 
@@ -38,7 +38,11 @@ object Compass {
 
     @JvmStatic
     fun navigate(url: String): RouteIntent {
-        return ProcessableIntent(url)
+        return if (url.contains("://")) {
+            ProcessableIntent(url)
+        } else {
+            ProcessableIntent("://${url}")
+        }
     }
 
     @JvmStatic
@@ -69,7 +73,7 @@ object Compass {
         return routePages.containsKey(key)
     }
 
-    internal fun internalNavigate(context: Any, routeIntent: ProcessableIntent): Boolean {
+    internal fun internalNavigate(context: Any, routeIntent: ProcessableIntent): Any? {
         // 判断协议拦截 (拦截非原生页, 页面升级等)
         schemeInterceptor?.intercept(routeIntent)
 
@@ -87,7 +91,7 @@ object Compass {
             }
         }
 
-        page ?: return false
+        page ?: return null
 
         // 若存在对应的页面, 则寻找 page 对应的拦截器
         val interceptorsOfPage = findInterceptorsOfPage(page)
@@ -100,31 +104,43 @@ object Compass {
             }
         }
 
-        performNavigate(context, page!!, routeIntent)
-        return true
+        return performNavigate(context, page!!, routeIntent)
     }
 
     private fun performNavigate(
         context: Any,
         page: CompassPage,
         routeIntent: ProcessableIntent
-    ) {
-        val activity = context.asActivity()
-        val intent = Intent(activity, page.target)
-        if (routeIntent.innerBundle != null) {
-            intent.putExtras(routeIntent.innerBundle!!)
-        }
+    ): Any? = when (page.type) {
+        TargetType.ACTIVITY -> {
+            val activity = context.asActivity()
+            val intent = Intent(activity, page.target)
+            if (routeIntent.innerBundle != null) {
+                intent.putExtras(routeIntent.innerBundle!!)
+            }
 
-        if (page.requestCode == 0) {
-            ActivityCompat.startActivity(activity, intent, routeIntent.options)
-        } else {
-            val fragment = context.asFragment()
-            if (fragment == null) {
-                ActivityCompat.startActivityForResult(activity, intent, page.requestCode, routeIntent.options)
+            if (page.requestCode == 0) {
+                ActivityCompat.startActivity(activity, intent, routeIntent.options)
             } else {
-                fragment.startActivityForResult(intent, page.requestCode, routeIntent.options)
+                val fragment = context.asFragment()
+                if (fragment == null) {
+                    ActivityCompat.startActivityForResult(
+                        activity,
+                        intent,
+                        page.requestCode,
+                        routeIntent.options
+                    )
+                } else {
+                    fragment.startActivityForResult(intent, page.requestCode, routeIntent.options)
+                }
             }
         }
+        TargetType.FRAGMENT -> {
+            val fragment = page.target.getConstructor().newInstance() as Fragment
+            fragment.arguments = routeIntent.innerBundle
+            fragment
+        }
+        else -> null
     }
 
     private fun findInterceptorsOfPage(page: CompassPage): List<RouteInterceptor> {
@@ -135,7 +151,8 @@ object Compass {
         val definedInterceptorClzList = Arrays.asList(*page.interceptors)
         val interceptorInstanceList = ArrayList(routeInterceptors)
 
-        val definedInterceptorInstanceList = ArrayList<RouteInterceptor>(definedInterceptorClzList.size)
+        val definedInterceptorInstanceList =
+            ArrayList<RouteInterceptor>(definedInterceptorClzList.size)
 
         definedInterceptorClzList.forEachIndexed { index, clz ->
             val i = interceptorInstanceList.firstOrNull { it::class.java == clz }

@@ -8,9 +8,9 @@ import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 
 @KotlinPoetKspPreview
 @KspExperimental
-class CompassKspProcessorProvider : SymbolProcessorProvider {
+class CompassProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
         environment.logger.info("Start creating compass ksp processor...")
-        return CompassKspProcessor(environment)
+        return CompassProcessor(environment)
     }
 }

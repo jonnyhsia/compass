@@ -1,6 +1,7 @@
 package com.arch.jonnyhsia.compass.compiler
 
 import com.arch.jonnyhsia.compass.api.Route
+import com.arch.jonnyhsia.compass.api.TargetType
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -10,12 +11,12 @@ import kotlin.reflect.KClass
 
 @KotlinPoetKspPreview
 @KspExperimental
-class KspRouteSymbol(logger: KSPLogger, val symbol: KSClassDeclaration) {
+class KspRouteSymbol(val symbol: KSClassDeclaration) {
 
     val route: Route
 
-    // com.arch.jonnyhsia.compass.sample.DetailActivity
-    val target = symbol.asType().toClassName()
+    val targetKsType = symbol.asType()
+    val target = targetKsType.toClassName()
 
     init {
         val routeAnnotation = symbol.annotations.first { it.shortName.asString() == "Route" }

@@ -1,17 +1,15 @@
 package com.arch.jonnyhsia.compass.compiler
 
-import com.arch.jonnyhsia.compass.api.CompassPage
-import com.arch.jonnyhsia.compass.api.ICompassTable
-import com.arch.jonnyhsia.compass.api.PageKey
-import com.arch.jonnyhsia.compass.api.Route
+import com.arch.jonnyhsia.compass.api.*
 import com.google.devtools.ksp.KspExperimental
+import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
@@ -19,7 +17,7 @@ import kotlin.concurrent.thread
 
 @KotlinPoetKspPreview
 @KspExperimental
-class CompassKspProcessor(
+class CompassProcessor(
     environment: SymbolProcessorEnvironment
 ) : SymbolProcessor {
 
@@ -51,25 +49,31 @@ class CompassKspProcessor(
         }
     }
 
+    private lateinit var activityType: KSType
+    private lateinit var fragmentType: KSType
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        activityType = resolver.getClassDeclarationByName("android.app.Activity")!!.asType()
+        fragmentType =
+            resolver.getClassDeclarationByName("androidx.fragment.app.Fragment")!!.asType()
+
         logger.warn("Start processing...")
         val symbols = resolver.getSymbolsWithAnnotation(ROUTE_NAME)
         symbols.forEach { type ->
-            logger.warn("aaa")
             if (type !is KSClassDeclaration) {
                 return@forEach
             }
-            logger.warn("Detect symbol: $type, ${type::class.simpleName}")
-            routeSymbols.add(KspRouteSymbol(logger, type).also {
-                logger.warn(it.toString())
-            })
+            routeSymbols.add(KspRouteSymbol(type))
         }
-        logger.warn("Symbols: ${routeSymbols.size}")
         generateCode(routeSymbols)
         return emptyList()
     }
 
     private fun generateCode(annotations: List<KspRouteSymbol>) {
+        if (annotations.isEmpty()) {
+            return
+        }
+
         thread {
             val filename = tableName
             codeGenerator.createNewFile(
@@ -82,7 +86,7 @@ class CompassKspProcessor(
                     PageKey::class.asTypeName(),
                     CompassPage::class.asTypeName()
                 )
-                logger.warn("hello")
+                logger.warn("hello: $annotations")
                 FileSpec.builder(tablePackage, filename)
                     .addType(
                         TypeSpec.classBuilder(filename)
@@ -110,8 +114,6 @@ class CompassKspProcessor(
         super.finish()
     }
 
-    inner class RouteVisitor : KSVisitorVoid()
-
     private fun FunSpec.Builder.collectAllRoutesAndReturn(
         symbols: List<KspRouteSymbol>,
         tableType: ParameterizedTypeName
@@ -119,19 +121,29 @@ class CompassKspProcessor(
         logger.warn("hello222")
         addComment("Read routes(${symbols.size}) from annotations and generate router map")
         addStatement("val map = %T()", tableType)
-        if (symbols.isEmpty()) {
-            throw Exception()
-        }
 
         for (symbol in symbols) {
+            val isActivity = activityType.isAssignableFrom(symbol.targetKsType)
+            val isFragment = fragmentType.isAssignableFrom(symbol.targetKsType)
+//            logger.warn("${symbol.symbol.asType().toClassName().packageName} isAssignableFrom: $result")
+            logger.warn("Activity isAssignableFrom symbol: $isActivity")
+            logger.warn("Fragment isAssignableFrom symbol: $isFragment")
+
+            val targetType: TargetType = when {
+                isActivity -> TargetType.ACTIVITY
+                isFragment -> TargetType.FRAGMENT
+                else -> TargetType.UNKNOWN
+            }
             addStatement(
-                "map[%T(%S, %S)] = %T(%S, %T::class.java, %L)",
+                "map[%T(%S)] = %T(%S, %T::class.java, %L, %T.%L, %S)",
                 PageKey::class.java,
-                symbol.route.scheme,
                 symbol.route.name,
-                CompassPage::class.java, symbol.route.name,
+                CompassPage::class.java,
+                symbol.route.name,
                 symbol.target,
-                symbol.route.requestCode
+                symbol.route.requestCode,
+                targetType::class.java, targetType.name,
+                symbol.route.scheme
             )
         }
         addCode("return map")

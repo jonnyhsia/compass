@@ -52,9 +52,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.4.1'
 
-    implementation "com.arch.jonnyhsia:compass:$pomVersion"
-    ksp "com.arch.jonnyhsia:compass-compiler:$pomVersion"
+//    implementation "com.arch.jonnyhsia:compass:$pomVersion"
+//    ksp "com.arch.jonnyhsia:compass-compiler:$pomVersion"
 //    implementation project(path: ':test-processor')
-//    ksp project(':compiler')
+    implementation project(':compass')
+    ksp project(':compiler')
 //    ksp project(':test-processor')
 }
