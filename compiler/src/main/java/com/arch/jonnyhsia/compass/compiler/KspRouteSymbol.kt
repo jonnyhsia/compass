@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 
 @KotlinPoetKspPreview
 @KspExperimental
-class KspRouteSymbol(val symbol: KSClassDeclaration) {
+class KspRouteSymbol(symbol: KSClassDeclaration) {
 
     val route: Route
 

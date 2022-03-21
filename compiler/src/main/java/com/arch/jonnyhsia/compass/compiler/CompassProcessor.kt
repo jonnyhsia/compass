@@ -10,6 +10,8 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
+import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
@@ -59,25 +61,26 @@ class CompassProcessor(
 
         logger.warn("Start processing...")
         val symbols = resolver.getSymbolsWithAnnotation(ROUTE_NAME)
-        symbols.forEach { type ->
-            if (type !is KSClassDeclaration) {
-                return@forEach
+        val ret = symbols.filterNot { it.validate() }.toList()
+        symbols.filterIsInstance<KSClassDeclaration>()
+            .filter { it.validate() }
+            .forEach { type ->
+                routeSymbols.add(KspRouteSymbol(type))
             }
-            routeSymbols.add(KspRouteSymbol(type))
-        }
+        logger.warn("Count: ${routeSymbols.size}")
+        return ret
+    }
+
+    override fun finish() {
         generateCode(routeSymbols)
-        return emptyList()
+        super.finish()
     }
 
     private fun generateCode(annotations: List<KspRouteSymbol>) {
-        if (annotations.isEmpty()) {
-            return
-        }
-
         thread {
             val filename = tableName
             codeGenerator.createNewFile(
-                dependencies = Dependencies.ALL_FILES,
+                dependencies = Dependencies(true),
                 packageName = tablePackage,
                 fileName = filename,
                 extensionName = "kt"
@@ -108,10 +111,6 @@ class CompassProcessor(
                     .writeTo(writer)
             }
         }
-    }
-
-    override fun finish() {
-        super.finish()
     }
 
     private fun FunSpec.Builder.collectAllRoutesAndReturn(
@@ -149,4 +148,9 @@ class CompassProcessor(
         addCode("return map")
         return this
     }
+//    inner class RouteVisitor : KSVisitorVoid() {
+//        override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+//            super.visitClassDeclaration(classDeclaration, data)
+//        }
+//    }
 }
