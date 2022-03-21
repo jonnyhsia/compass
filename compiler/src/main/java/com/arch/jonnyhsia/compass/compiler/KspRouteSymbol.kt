@@ -19,22 +19,12 @@ class KspRouteSymbol(symbol: KSClassDeclaration) {
     val target = targetKsType.toClassName()
 
     init {
-        val routeAnnotation = symbol.annotations.first { it.shortName.asString() == "Route" }
+        val routeAnnotation = symbol.findAnnotationWithType<Route>()!!
 
-        var name = ""
-        var scheme: String = ""
-        var interceptors: Array<KClass<*>>? = null
-        var requestCode: Int = 0
-        routeAnnotation.arguments.forEach {
-            val argName = it.name?.asString()
-            when (argName) {
-                "scheme" -> scheme = it.value as String? ?: ""
-                "name" -> name = it.value as String
-//                "interceptors" -> interceptors = it.value as Array<KClass<*>>?
-                "requestCode" -> requestCode = it.value as Int
-                else -> {}
-            }
-        }
+        val name = routeAnnotation.name
+        val scheme: String = routeAnnotation.scheme
+        val interceptors: Array<KClass<*>>? = null
+        val requestCode: Int = routeAnnotation.requestCode
         route = Route(scheme, name, interceptors ?: emptyArray(), requestCode)
     }
 

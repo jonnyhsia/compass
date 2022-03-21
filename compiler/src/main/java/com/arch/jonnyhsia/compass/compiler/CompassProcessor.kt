@@ -10,8 +10,6 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSVisitorVoid
-import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
@@ -23,12 +21,9 @@ class CompassProcessor(
     environment: SymbolProcessorEnvironment
 ) : SymbolProcessor {
 
-    companion object {
-        private val ROUTE_NAME = Route::class.qualifiedName!!
-        private const val TABLE_FULL_PATH = "compassTable"
-        private const val DEFAULT_SCHEME = "compassDefaultPageScheme"
-
-        var count = 0
+    private companion object {
+        val ROUTE_NAME = Route::class.qualifiedName!!
+        const val TABLE_FULL_PATH = "compassTable"
     }
 
     private val codeGenerator = environment.codeGenerator
@@ -38,6 +33,8 @@ class CompassProcessor(
     private val tableName: String
 
     private val routeSymbols = ArrayList<KspRouteSymbol>()
+
+    private lateinit var dependencies: Dependencies
 
     init {
         val tableFullName = environment.options[TABLE_FULL_PATH]
@@ -60,15 +57,20 @@ class CompassProcessor(
             resolver.getClassDeclarationByName("androidx.fragment.app.Fragment")!!.asType()
 
         logger.warn("Start processing...")
+        logger.warn("getSymbolsWithAnnotation: $ROUTE_NAME")
         val symbols = resolver.getSymbolsWithAnnotation(ROUTE_NAME)
-        val ret = symbols.filterNot { it.validate() }.toList()
-        symbols.filterIsInstance<KSClassDeclaration>()
-            .filter { it.validate() }
-            .forEach { type ->
+
+        dependencies = Dependencies(false, *resolver.getAllFiles().toList().toTypedArray())
+
+        symbols.forEach { type ->
+            if (type is KSClassDeclaration) {
                 routeSymbols.add(KspRouteSymbol(type))
+            } else {
+                logger.warn("$type is not class declaration")
             }
+        }
         logger.warn("Count: ${routeSymbols.size}")
-        return ret
+        return emptyList()
     }
 
     override fun finish() {
@@ -80,7 +82,7 @@ class CompassProcessor(
         thread {
             val filename = tableName
             codeGenerator.createNewFile(
-                dependencies = Dependencies(true),
+                dependencies = dependencies,
                 packageName = tablePackage,
                 fileName = filename,
                 extensionName = "kt"
@@ -92,12 +94,8 @@ class CompassProcessor(
                 logger.warn("hello: $annotations")
                 FileSpec.builder(tablePackage, filename)
                     .addType(
-                        TypeSpec.classBuilder(filename)
+                        TypeSpec.objectBuilder(filename)
                             .addSuperinterface(ICompassTable::class)
-                            .primaryConstructor(
-                                FunSpec.constructorBuilder()
-                                    .build()
-                            )
                             .addFunction(
                                 FunSpec.builder("getPages")
                                     .addModifiers(KModifier.OVERRIDE)
