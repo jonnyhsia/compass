@@ -5,17 +5,14 @@ apply from: './upload-compiler.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-//    implementation 'com.google.auto.service:auto-service:1.0.1'
-//    kapt 'com.google.auto.service:auto-service:1.0.1'
     implementation 'com.google.devtools.ksp:symbol-processing-api:1.6.10-1.0.4'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'com.squareup:javapoet:1.12.1'
     implementation 'com.squareup:kotlinpoet:1.10.2'
     implementation 'com.squareup:kotlinpoet-ksp:1.10.2'
 
-    implementation project(':api')
-//    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
+//    implementation project(':api')
+    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

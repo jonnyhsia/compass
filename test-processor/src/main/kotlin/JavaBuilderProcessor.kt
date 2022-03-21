@@ -56,5 +56,4 @@ class JavaBuilderProcessor : AbstractProcessor() {
                 .map { processType(it) }
         return true
     }
-
 }

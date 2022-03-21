@@ -7,11 +7,11 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
     defaultConfig {
         applicationId "com.arch.jonnyhsia.compass.sample"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode rootProject.versionCode
         versionName rootProject.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -50,10 +50,11 @@ ksp {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
 
-    implementation project(':compass')
+    implementation "com.arch.jonnyhsia:compass:$pomVersion"
+    ksp "com.arch.jonnyhsia:compass-compiler:$pomVersion"
 //    implementation project(path: ':test-processor')
-    ksp project(':compiler')
+//    ksp project(':compiler')
 //    ksp project(':test-processor')
 }

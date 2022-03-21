@@ -14,8 +14,10 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import kotlin.concurrent.thread
 
+@KotlinPoetKspPreview
 @KspExperimental
 class CompassKspProcessor(
     environment: SymbolProcessorEnvironment
@@ -52,13 +54,13 @@ class CompassKspProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.warn("Start processing...")
         val symbols = resolver.getSymbolsWithAnnotation(ROUTE_NAME)
-        for (type in symbols) {
+        symbols.forEach { type ->
             logger.warn("aaa")
             if (type !is KSClassDeclaration) {
-                continue
+                return@forEach
             }
             logger.warn("Detect symbol: $type, ${type::class.simpleName}")
-            routeSymbols.add(KspRouteSymbol(type).also {
+            routeSymbols.add(KspRouteSymbol(logger, type).also {
                 logger.warn(it.toString())
             })
         }
@@ -81,7 +83,7 @@ class CompassKspProcessor(
                     CompassPage::class.asTypeName()
                 )
                 logger.warn("hello")
-                val spec = FileSpec.builder(tablePackage, filename)
+                FileSpec.builder(tablePackage, filename)
                     .addType(
                         TypeSpec.classBuilder(filename)
                             .addSuperinterface(ICompassTable::class)
@@ -100,12 +102,6 @@ class CompassKspProcessor(
                     )
                     .build()
                     .writeTo(writer)
-//                for (annotation in annotations) {
-//                    val name = annotation.name
-//                    val scheme = annotation.scheme
-//                    val interceptors = annotation.interceptors
-//                    val requestCode = annotation.requestCode
-//                }
             }
         }
     }
@@ -128,22 +124,13 @@ class CompassKspProcessor(
         }
 
         for (symbol in symbols) {
-//            val map = hashMapOf<PageKey, CompassPage>()
-//            map[PageKey(symbol.route.scheme, symbol.route.name)] = CompassPage(
-//                symbol.route.name,
-//                Any::class.java,
-//                symbol.route.requestCode
-//            )
-//            logger.warn("target: ${symbol.target}")
-            val clz = Class.forName(symbol.target)
-            logger.warn(clz.toString())
             addStatement(
                 "map[%T(%S, %S)] = %T(%S, %T::class.java, %L)",
                 PageKey::class.java,
                 symbol.route.scheme,
                 symbol.route.name,
                 CompassPage::class.java, symbol.route.name,
-                clz.asTypeName(),
+                symbol.target,
                 symbol.route.requestCode
             )
         }

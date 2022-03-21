@@ -27,7 +27,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    compileOnly 'androidx.appcompat:appcompat:1.0.2'
-    api project(':api')
-//     api "com.arch.jonnyhsia:compass-api:$pomVersion"
+    compileOnly 'androidx.appcompat:appcompat:1.4.1'
+//    api project(':api')
+    api "com.arch.jonnyhsia:compass-api:$pomVersion"
 }
