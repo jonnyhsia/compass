@@ -27,10 +27,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnGoMembersOnly.setOnClickListener {
-//            val fragment = Compass.navigate(url = "frag").go(this)
-//                    as Fragment
-//            Log.d("MainActivity", "onCreate: $fragment")
-            Compass.navigate("sample://MembersOnly").go(this)
+            Compass.navigate("expired").go(this)
         }
     }
 }

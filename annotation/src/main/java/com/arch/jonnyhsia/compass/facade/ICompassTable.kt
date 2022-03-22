@@ -2,5 +2,5 @@ package com.arch.jonnyhsia.compass.facade
 
 interface ICompassTable {
 
-    fun getPages(): Map<String, CompassPage>
+    fun getPages(): Map<String, CompassMeta>
 }

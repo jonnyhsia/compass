@@ -4,5 +4,5 @@ enum class TargetType(id: Int) {
     UNKNOWN(id = -1),
     ACTIVITY(id = 0),
     FRAGMENT(id = 1),
-    RUNNABLE(id = 2)
+    ECHO(id = 2)
 }
