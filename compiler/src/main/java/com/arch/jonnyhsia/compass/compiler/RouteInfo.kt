@@ -1,6 +1,6 @@
 package com.arch.jonnyhsia.compass.compiler
 
-import com.arch.jonnyhsia.compass.api.annotation.Route
+import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.squareup.javapoet.ClassName
 import javax.lang.model.element.TypeElement
 

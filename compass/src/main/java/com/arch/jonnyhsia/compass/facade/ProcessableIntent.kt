@@ -95,6 +95,12 @@ class ProcessableIntent internal constructor(
 
     private fun internalGo(any: Any): Any? {
         this.context = any
+
+        for (key in uri.queryParameterNames) {
+            val value = uri.getQueryParameter(key)
+            bundle().putString(key, value)
+        }
+
         return Compass.internalNavigate(context, this)
     }
 
