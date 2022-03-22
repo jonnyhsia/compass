@@ -2,14 +2,10 @@ apply plugin: 'java-library'
 apply plugin: 'kotlin'
 apply from: './upload-api.gradle'
 
-sourceSets {
-    main.java.srcDirs += 'src/main'
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 
-sourceCompatibility = "7"
-targetCompatibility = "7"
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8

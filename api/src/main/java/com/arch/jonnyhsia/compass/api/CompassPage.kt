@@ -1,8 +1,11 @@
 package com.arch.jonnyhsia.compass.api
 
-class CompassPage(
-        val name: String,
-        val target: Class<*>,
-        val requestCode: Int,
-        val interceptors: Array<Class<*>>
+
+class CompassPage @JvmOverloads constructor(
+    val name: String,
+    val target: Class<*>,
+    val requestCode: Int,
+    val type: TargetType = TargetType.UNKNOWN,
+    val group: String = "",
+    val interceptors: Array<Class<*>> = emptyArray()
 )

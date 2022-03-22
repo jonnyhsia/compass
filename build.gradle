@@ -2,8 +2,8 @@
 
 buildscript {
     ext.kotlin_version = '1.6.10'
-    ext.versionCode = 2
-    ext.versionName = '1.1.0.1'
+    ext.versionCode = 4
+    ext.versionName = '2.0.2'
     ext.stable = false
     ext.pomVersion = stable ? versionName : (versionName + '-SNAPSHOT')
 

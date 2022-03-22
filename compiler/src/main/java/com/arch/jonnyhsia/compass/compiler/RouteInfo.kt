@@ -13,8 +13,8 @@ class RouteInfo(
     val name: String
         get() = route.name
 
-    val target: ClassName
-        get() = ClassName.get(element)
+    val type = element.asType()
+    val target: ClassName = ClassName.get(element)
 
     val routeString: String
         get() = route.toString()

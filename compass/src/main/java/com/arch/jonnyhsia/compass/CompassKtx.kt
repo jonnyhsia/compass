@@ -18,8 +18,8 @@ inline fun Fragment.navigate(url: String, block: RouteIntent.() -> Unit = {}) {
         .go(this)
 }
 
-inline fun Activity.navigate(uri: Uri, block: RouteIntent.() -> Unit = {}) {
-    Compass.navigate(uri)
+inline fun Activity.navigate(uri: Uri?, block: RouteIntent.() -> Unit = {}) {
+    Compass.navigate(uri ?: return)
         .apply(block)
         .go(this)
 }

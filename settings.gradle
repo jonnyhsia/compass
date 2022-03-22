@@ -1,1 +1,1 @@
-include ':app', ':compiler', ':api', ':compass'
+include ':app', ':compiler', ':api', ':compass', ':test-processor', ':ksp-compiler'

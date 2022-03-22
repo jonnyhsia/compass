@@ -2,20 +2,38 @@ package com.arch.jonnyhsia.compass.compiler;
 
 import com.arch.jonnyhsia.compass.api.CompassPage;
 import com.arch.jonnyhsia.compass.api.ICompassTable;
-import com.arch.jonnyhsia.compass.api.PageKey;
 import com.arch.jonnyhsia.compass.api.Route;
+import com.arch.jonnyhsia.compass.api.TargetType;
 import com.google.auto.service.AutoService;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeSpec;
 
-import javax.annotation.processing.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
+import javax.annotation.processing.Messager;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.Processor;
+import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import java.io.IOException;
-import java.util.*;
 
 @AutoService(Processor.class)
 public class CompassProcessor extends AbstractProcessor {
@@ -30,6 +48,12 @@ public class CompassProcessor extends AbstractProcessor {
     private String tableName;
     private String defaultScheme;
 
+    private Elements elementUtils;
+    private Types typeUtils;
+
+    private TypeMirror typeActivity;
+    private TypeMirror typeFragment;
+
     private int round = 0;
 
     @Override
@@ -37,6 +61,11 @@ public class CompassProcessor extends AbstractProcessor {
         super.init(processingEnvironment);
         filer = processingEnvironment.getFiler();
         messager = processingEnvironment.getMessager();
+        elementUtils = processingEnvironment.getElementUtils();
+        typeUtils = processingEnvironment.getTypeUtils();
+
+        typeActivity = elementUtils.getTypeElement(Const.ACTIVITY).asType();
+        typeFragment = elementUtils.getTypeElement(Const.FRAGMENT).asType();
 
         final String tableFullName = processingEnvironment.getOptions().get(TABLE_FULL_PATH);
         if (tableFullName != null && !tableFullName.isEmpty()) {
@@ -92,63 +121,66 @@ public class CompassProcessor extends AbstractProcessor {
 
     private void generateJavaCode(List<RouteInfo> routeInfoList) throws IOException {
         // HashMap<PageKey, CompassPage>
-        ParameterizedTypeName pageMapType = ParameterizedTypeName.get(HashMap.class, PageKey.class, CompassPage.class);
-        // private final static HashMap pages = loadPages();
-        FieldSpec.Builder pagesField = FieldSpec.builder(pageMapType, "pages", Modifier.FINAL, Modifier.PRIVATE, Modifier.STATIC)
-                .initializer("loadPages()");
+        ParameterizedTypeName pageMapType = ParameterizedTypeName.get(HashMap.class, String.class, CompassPage.class);
 
-        // private final static Map loadPages()
-        // HashMap map = new HashMap()
-        MethodSpec.Builder addPageMethod = MethodSpec.methodBuilder("loadPages")
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+        // @Override
+        // final Map<PageKey, CompassPage> loadPages()
+        // HashMap<PageKey, CompassPage> map = new HashMap<>()
+        MethodSpec.Builder getPagesMethod = MethodSpec.methodBuilder("getPages")
+                .addAnnotation(AnnotationSpec.builder(Override.class).build())
+                .addModifiers(Modifier.FINAL, Modifier.PUBLIC)
                 .returns(pageMapType)
                 .addStatement("$T map = new $T<>()", pageMapType, HashMap.class);
 
         // map.put(PageKey, CompassPage)
         for (RouteInfo routeInfo : routeInfoList) {
-            addPageMethod.addComment(routeInfo.getRouteString());
-            addPageMethod.addCode("map.put(new $T($S, $S), new $T($S, $T.class, $L",
-                    PageKey.class, pageScheme(routeInfo.getScheme()), routeInfo.getName(),
-                    CompassPage.class, routeInfo.getName(), routeInfo.getTarget(), routeInfo.getRequestCode());
+            TargetType targetType = getTargetTypeByRouteInfo(routeInfo);
+            getPagesMethod.addComment(routeInfo.getRouteString());
+            getPagesMethod.addCode("map.put($S, new $T($S, $T.class, $L, $T.$L, $S",
+                    routeInfo.getName(),
+                    CompassPage.class,
+                    routeInfo.getName(), routeInfo.getTarget(), routeInfo.getRequestCode(),
+                    targetType.getClass(), targetType.name(),
+                    pageScheme(routeInfo.getScheme()));
 
             if (routeInfo.getInterceptors().size() == 0) {
-                addPageMethod.addCode(", new $T[0]", Class.class);
+                getPagesMethod.addCode(", new $T[0]", Class.class);
             } else {
-                addPageMethod.addCode(", new $T[] {", Class.class);
+                getPagesMethod.addCode(", new $T[] {", Class.class);
                 for (int i = 0; i < routeInfo.getInterceptors().size(); i++) {
                     ClassName interceptorClz = routeInfo.getInterceptors().get(i);
-                    addPageMethod.addCode("$T.class", interceptorClz);
+                    getPagesMethod.addCode("$T.class", interceptorClz);
                     if (i != routeInfo.getInterceptors().size() - 1) {
-                        addPageMethod.addCode(", ");
+                        getPagesMethod.addCode(", ");
                     }
                 }
-                addPageMethod.addCode("}");
+                getPagesMethod.addCode("}");
             }
 
-            addPageMethod.addStatement("));");
+            getPagesMethod.addStatement("));");
         }
         // return map
-        addPageMethod.addStatement("return map");
-
-        // public final HashMap getPages() { return pages; }
-        MethodSpec.Builder getPagesMethod = MethodSpec.methodBuilder("getPages")
-                .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addAnnotation(Override.class)
-                .returns(pageMapType)
-                .addStatement("return pages");
+        getPagesMethod.addStatement("return map");
 
         // public final class XXX { }
         TypeSpec tableClass = TypeSpec.classBuilder(tableName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ICompassTable.class)
-                .addField(pagesField.build())
-                .addMethod(addPageMethod.build())
                 .addMethod(getPagesMethod.build())
                 .build();
 
         // com.arch.jonnyhsia.compass.XXX
         JavaFile javaFile = JavaFile.builder(tablePackage, tableClass).build();
         javaFile.writeTo(filer);
+    }
+
+    private TargetType getTargetTypeByRouteInfo(final RouteInfo routeInfo) {
+        if (typeUtils.isSubtype(routeInfo.getType(), typeActivity)) {
+            return TargetType.ACTIVITY;
+        } else if (typeUtils.isSubtype(routeInfo.getType(), typeFragment)){
+            return TargetType.FRAGMENT;
+        }
+        return TargetType.UNKNOWN;
     }
 
     private String pageScheme(String scheme) {

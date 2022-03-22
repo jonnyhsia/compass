@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.fragment.app.Fragment
-import com.arch.jonnyhsia.compass.api.PageKey
 
 interface RouteIntent {
     fun addParameter(key: String, value: String?): RouteIntent
@@ -13,8 +12,8 @@ interface RouteIntent {
     fun addParameter(key: String, parcelable: Parcelable): RouteIntent
     fun addParameters(bundle: Bundle): RouteIntent
     fun removeAllParameters(): RouteIntent
-    fun go(context: Context)
-    fun go(fragment: Fragment)
+    fun go(context: Context): Any?
+    fun go(fragment: Fragment): Any?
 }
 
 class ProcessableIntent internal constructor(
@@ -34,8 +33,8 @@ class ProcessableIntent internal constructor(
     internal var options: Bundle? = null
         private set
 
-    val pageKey: PageKey
-        get() = PageKey(uri.scheme, uri.host!!)
+    val path: String
+        get() = uri.host!!
 
     val requester: String
         get() = context.toString()
@@ -85,17 +84,17 @@ class ProcessableIntent internal constructor(
         return this
     }
 
-    override fun go(context: Context) {
-        internalGo(context)
+    override fun go(context: Context): Any? {
+        return internalGo(context)
     }
 
-    override fun go(fragment: Fragment) {
-        internalGo(fragment)
+    override fun go(fragment: Fragment): Any? {
+        return internalGo(fragment)
     }
 
-    private fun internalGo(any: Any) {
+    private fun internalGo(any: Any): Any? {
         this.context = any
-        Compass.internalNavigate(context, this)
+        return Compass.internalNavigate(context, this)
     }
 
     private fun bundle(): Bundle {
