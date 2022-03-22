@@ -1,33 +1,50 @@
+plugins {
+    id("com.google.devtools.ksp").version("1.6.10-1.0.4")
+}
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 31
     defaultConfig {
         applicationId "com.arch.jonnyhsia.compass.sample"
         minSdkVersion 21
-        targetSdkVersion 28
+        targetSdkVersion 31
         versionCode rootProject.versionCode
         versionName rootProject.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-//        javaCompileOptions {
-//            annotationProcessorOptions {
-//                arguments = [
-//                        COMPASS_TABLE_PKG_NAME: applicationId,
-//                        DEFAULT_PAGE_SCHEME: "sample"
-//                ]
-//            }
-//        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            sourceSets {
+                main {
+                    it.java.srcDir(new File("build/generated/ksp/release/kotlin"))
+                }
+            }
+        }
+        debug {
+            sourceSets {
+                main {
+                    it.java.srcDir(new File("build/generated/ksp/debug/kotlin"))
+                }
+            }
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+ksp {
+    arg("compassTable", "com.arch.jonnyhsia.compass.SampleTable")
+    arg("compassDefaultPageScheme", "sample")
 }
 
 kapt {
@@ -40,12 +57,13 @@ kapt {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
 
+//    implementation "com.arch.jonnyhsia:compass:$pomVersion"
+//    ksp "com.arch.jonnyhsia:compass-compiler:$pomVersion"
+//    implementation project(path: ':test-processor')
     implementation project(':compass')
-    kapt project(':compiler')
-
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+//    kapt project(':compiler')
+    ksp project(':ksp-compiler')
+//    ksp project(':test-processor')
 }

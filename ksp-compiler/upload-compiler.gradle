@@ -7,7 +7,7 @@ def localProperties = new Properties()
 localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 
 task generateSourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
+    from sourceSets.main.java.srcDirs
     classifier 'sources'
 }
 
@@ -15,19 +15,11 @@ afterEvaluate {
     publishing {
         publications {
             // Creates a Maven publication called "release"
-            release(MavenPublication) {
+            maven(MavenPublication) {
                 // Applies the component for the release build variant.
-                from components.release
+                from components.java
                 groupId = 'com.arch.jonnyhsia'
-                artifactId = 'compass'
-                version = rootProject.pomVersion
-                artifact generateSourcesJar
-            }
-            debug(MavenPublication) {
-                // Applies the component for the release build variant.
-                from components.release
-                groupId = 'com.arch.jonnyhsia'
-                artifactId = 'compass'
+                artifactId = 'compass-compiler-ksp'
                 version = rootProject.pomVersion
                 artifact generateSourcesJar
             }
