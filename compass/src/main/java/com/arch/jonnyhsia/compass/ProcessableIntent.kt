@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.fragment.app.Fragment
-import com.arch.jonnyhsia.compass.api.PageKey
 
 interface RouteIntent {
     fun addParameter(key: String, value: String?): RouteIntent
@@ -34,7 +33,8 @@ class ProcessableIntent internal constructor(
     internal var options: Bundle? = null
         private set
 
-    val pageKey: PageKey = PageKey(uri.host!!)
+    val path: String
+        get() = uri.host!!
 
     val requester: String
         get() = context.toString()

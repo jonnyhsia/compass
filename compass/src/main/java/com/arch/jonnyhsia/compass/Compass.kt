@@ -7,7 +7,6 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.arch.jonnyhsia.compass.api.CompassPage
 import com.arch.jonnyhsia.compass.api.ICompassTable
-import com.arch.jonnyhsia.compass.api.PageKey
 import com.arch.jonnyhsia.compass.api.TargetType
 import com.arch.jonnyhsia.compass.interceptor.RouteInterceptor
 import com.arch.jonnyhsia.compass.interceptor.SchemeInterceptor
@@ -19,7 +18,7 @@ object Compass {
 
     private val initialized = AtomicBoolean(false)
 
-    private lateinit var routePages: Map<PageKey, CompassPage>
+    private lateinit var routePages: Map<String, CompassPage>
 
     private var schemeInterceptor: SchemeInterceptor? = null
     private var pageHandler: UnregisterPageHandler? = null
@@ -69,7 +68,7 @@ object Compass {
      * 验证是否有存在的 Page
      */
     @JvmStatic
-    fun validatePageKey(key: PageKey): Boolean {
+    fun validatePagePath(key: String): Boolean {
         return routePages.containsKey(key)
     }
 
@@ -78,7 +77,7 @@ object Compass {
         schemeInterceptor?.intercept(routeIntent)
 
         // 寻找 url 对应的页面
-        var page = routePages[routeIntent.pageKey]
+        var page = routePages[routeIntent.path]
 
         // 若页面未找到, 页面降级
         val uriBeforePageHandler = routeIntent.uri
@@ -87,7 +86,7 @@ object Compass {
 
             // 如果 url 被 handle 了, 则需要更新 page 对象
             if (uriBeforePageHandler != routeIntent.uri) {
-                page = routePages[routeIntent.pageKey]
+                page = routePages[routeIntent.path]
             }
         }
 
@@ -100,7 +99,7 @@ object Compass {
             val uriBeforeIntercept = routeIntent.uri
             interceptor.intercept(routeIntent)
             if (uriBeforeIntercept != routeIntent.uri) {
-                page = routePages[routeIntent.pageKey]
+                page = routePages[routeIntent.path]
             }
         }
 

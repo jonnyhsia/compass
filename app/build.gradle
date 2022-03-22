@@ -47,6 +47,13 @@ ksp {
     arg("compassDefaultPageScheme", "sample")
 }
 
+kapt {
+    arguments {
+        arg("compassTable", "com.arch.jonnyhsia.compass.sample.SampleTable")
+        arg("compassDefaultPageScheme", "sample")
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -56,6 +63,7 @@ dependencies {
 //    ksp "com.arch.jonnyhsia:compass-compiler:$pomVersion"
 //    implementation project(path: ':test-processor')
     implementation project(':compass')
-    ksp project(':compiler')
+//    kapt project(':compiler')
+    ksp project(':ksp-compiler')
 //    ksp project(':test-processor')
 }
