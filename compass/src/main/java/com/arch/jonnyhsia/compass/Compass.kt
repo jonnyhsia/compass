@@ -5,12 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import com.arch.jonnyhsia.compass.api.CompassPage
-import com.arch.jonnyhsia.compass.api.ICompassTable
-import com.arch.jonnyhsia.compass.api.TargetType
-import com.arch.jonnyhsia.compass.interceptor.RouteInterceptor
-import com.arch.jonnyhsia.compass.interceptor.SchemeInterceptor
-import com.arch.jonnyhsia.compass.interceptor.UnregisterPageHandler
+import com.arch.jonnyhsia.compass.facade.*
+import com.arch.jonnyhsia.compass.facade.enums.TargetType
+import com.arch.jonnyhsia.compass.facade.annotation.RouteInterceptor
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -22,7 +19,7 @@ object Compass {
 
     private var schemeInterceptor: SchemeInterceptor? = null
     private var pageHandler: UnregisterPageHandler? = null
-    private var routeInterceptors = ArrayList<RouteInterceptor>()
+    private var routeInterceptors = ArrayList<IRouteInterceptor>()
 
     /**
      * 初始化路由
@@ -60,7 +57,7 @@ object Compass {
     }
 
     @JvmStatic
-    fun addRouteInterceptor(interceptor: RouteInterceptor) {
+    fun addRouteInterceptor(interceptor: IRouteInterceptor) {
         routeInterceptors.add(interceptor)
     }
 
@@ -142,16 +139,16 @@ object Compass {
         else -> null
     }
 
-    private fun findInterceptorsOfPage(page: CompassPage): List<RouteInterceptor> {
+    private fun findInterceptorsOfPage(page: CompassPage): List<IRouteInterceptor> {
         if (page.interceptors.isEmpty() || routeInterceptors.isEmpty()) {
             return emptyList()
         }
 
-        val definedInterceptorClzList = Arrays.asList(*page.interceptors)
+        val definedInterceptorClzList = listOf(*page.interceptors)
         val interceptorInstanceList = ArrayList(routeInterceptors)
 
         val definedInterceptorInstanceList =
-            ArrayList<RouteInterceptor>(definedInterceptorClzList.size)
+            ArrayList<IRouteInterceptor>(definedInterceptorClzList.size)
 
         definedInterceptorClzList.forEachIndexed { index, clz ->
             val i = interceptorInstanceList.firstOrNull { it::class.java == clz }

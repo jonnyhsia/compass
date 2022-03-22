@@ -1,9 +1,9 @@
 package com.arch.jonnyhsia.compass.compiler
 
-import com.arch.jonnyhsia.compass.api.CompassPage
-import com.arch.jonnyhsia.compass.api.ICompassTable
-import com.arch.jonnyhsia.compass.api.Route
-import com.arch.jonnyhsia.compass.api.TargetType
+import com.arch.jonnyhsia.compass.facade.CompassPage
+import com.arch.jonnyhsia.compass.facade.ICompassTable
+import com.arch.jonnyhsia.compass.facade.annotation.Route
+import com.arch.jonnyhsia.compass.facade.enums.TargetType
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.Dependencies

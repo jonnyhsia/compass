@@ -1,9 +1,9 @@
 package com.arch.jonnyhsia.compass.compiler;
 
-import com.arch.jonnyhsia.compass.api.CompassPage;
-import com.arch.jonnyhsia.compass.api.ICompassTable;
-import com.arch.jonnyhsia.compass.api.Route;
-import com.arch.jonnyhsia.compass.api.TargetType;
+import com.arch.jonnyhsia.compass.facade.CompassPage;
+import com.arch.jonnyhsia.compass.facade.ICompassTable;
+import com.arch.jonnyhsia.compass.facade.annotation.Route;
+import com.arch.jonnyhsia.compass.facade.TargetType;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;

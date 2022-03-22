@@ -4,7 +4,7 @@ import android.app.Activity
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.arch.jonnyhsia.compass.api.Route
+import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.arch.jonnyhsia.compass.navigate
 import kotlinx.android.synthetic.main.activity_login.*
 

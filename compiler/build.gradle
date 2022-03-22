@@ -14,8 +14,8 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.squareup:javapoet:1.12.1'
+    implementation project(':annotation')
 
-    implementation project(':api')
     // implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
 //    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
 }

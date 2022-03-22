@@ -9,9 +9,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.squareup:kotlinpoet:1.10.2'
     implementation 'com.squareup:kotlinpoet-ksp:1.10.2'
-
-    implementation project(':api')
-//    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
+    implementation project(':annotation')
+    //    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
 }
 
 sourceCompatibility = JavaVersion.VERSION_1_8

@@ -1,4 +1,4 @@
-package com.arch.jonnyhsia.compass.api
+package com.arch.jonnyhsia.compass.facade
 
 interface ICompassTable {
 
