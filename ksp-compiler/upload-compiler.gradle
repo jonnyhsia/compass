@@ -1,0 +1,47 @@
+apply plugin: 'maven-publish'
+
+def localMavenRepo = 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+
+// used "repositoryRelease, repositorySnapshot, username, password"
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+
+task generateSourcesJar(type: Jar) {
+    from sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            // Creates a Maven publication called "release"
+            maven(MavenPublication) {
+                // Applies the component for the release build variant.
+                from components.java
+                groupId = 'com.arch.jonnyhsia'
+                artifactId = 'compass-compiler-ksp'
+                version = rootProject.pomVersion
+                artifact generateSourcesJar
+            }
+        }
+        repositories {
+            maven {
+                if (Boolean.parseBoolean(uploadLocal)) {
+                    url = localMavenRepo
+                } else if (rootProject.stable) {
+                    url = localProperties['repositoryRelease']
+                    credentials {
+                        username = localProperties['username']
+                        password = localProperties['password']
+                    }
+                } else {
+                    url = localProperties['repositorySnapshot']
+                    credentials {
+                        username = localProperties['username']
+                        password = localProperties['password']
+                    }
+                }
+            }
+        }
+    }
+}

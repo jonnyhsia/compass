@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+apply plugin: 'kotlin'
+apply from: './upload-compiler.gradle'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.google.devtools.ksp:symbol-processing-api:1.6.10-1.0.4'
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'com.squareup:kotlinpoet:1.10.2'
+    implementation 'com.squareup:kotlinpoet-ksp:1.10.2'
+
+    implementation project(':api')
+//    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
