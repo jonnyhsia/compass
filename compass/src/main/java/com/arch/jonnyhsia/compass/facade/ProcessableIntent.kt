@@ -1,10 +1,11 @@
-package com.arch.jonnyhsia.compass
+package com.arch.jonnyhsia.compass.facade
 
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.fragment.app.Fragment
+import com.arch.jonnyhsia.compass.Compass
 
 interface RouteIntent {
     fun addParameter(key: String, value: String?): RouteIntent
@@ -94,6 +95,12 @@ class ProcessableIntent internal constructor(
 
     private fun internalGo(any: Any): Any? {
         this.context = any
+
+        for (key in uri.queryParameterNames) {
+            val value = uri.getQueryParameter(key)
+            bundle().putString(key, value)
+        }
+
         return Compass.internalNavigate(context, this)
     }
 

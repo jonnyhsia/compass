@@ -1,28 +1,31 @@
 package com.arch.jonnyhsia.compass
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.collection.ArrayMap
+import androidx.collection.LruCache
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import com.arch.jonnyhsia.compass.api.CompassPage
-import com.arch.jonnyhsia.compass.api.ICompassTable
-import com.arch.jonnyhsia.compass.api.TargetType
-import com.arch.jonnyhsia.compass.interceptor.RouteInterceptor
-import com.arch.jonnyhsia.compass.interceptor.SchemeInterceptor
-import com.arch.jonnyhsia.compass.interceptor.UnregisterPageHandler
-import java.util.*
+import com.arch.jonnyhsia.compass.facade.*
+import com.arch.jonnyhsia.compass.facade.enums.TargetType
+import java.lang.reflect.Constructor
 import java.util.concurrent.atomic.AtomicBoolean
 
 object Compass {
 
     private val initialized = AtomicBoolean(false)
 
-    private lateinit var routePages: Map<String, CompassPage>
+    private lateinit var routePages: Map<String, CompassMeta>
 
     private var schemeInterceptor: SchemeInterceptor? = null
     private var pageHandler: UnregisterPageHandler? = null
-    private var routeInterceptors = ArrayList<RouteInterceptor>()
+    private var routeInterceptors = ArrayList<IRouteInterceptor>()
+
+    private val cachedFragmentConstructor = LruCache<CompassPage, Constructor<*>>(20)
+
+    private val cachedBlock = ArrayMap<CompassEcho, IRouteEcho>()
 
     /**
      * 初始化路由
@@ -60,7 +63,7 @@ object Compass {
     }
 
     @JvmStatic
-    fun addRouteInterceptor(interceptor: RouteInterceptor) {
+    fun addRouteInterceptor(interceptor: IRouteInterceptor) {
         routeInterceptors.add(interceptor)
     }
 
@@ -77,48 +80,52 @@ object Compass {
         schemeInterceptor?.intercept(routeIntent)
 
         // 寻找 url 对应的页面
-        var page = routePages[routeIntent.path]
+        var meta = routePages[routeIntent.path]
 
         // 若页面未找到, 页面降级
         val uriBeforePageHandler = routeIntent.uri
-        if (page == null && pageHandler != null) {
-            pageHandler!!.handleUri(routeIntent)
+        if (meta == null && pageHandler != null) {
+            pageHandler!!.intercept(routeIntent)
 
             // 如果 url 被 handle 了, 则需要更新 page 对象
             if (uriBeforePageHandler != routeIntent.uri) {
-                page = routePages[routeIntent.path]
+                meta = routePages[routeIntent.path]
             }
         }
 
-        page ?: return null
+        meta ?: return null
 
-        // 若存在对应的页面, 则寻找 page 对应的拦截器
-        val interceptorsOfPage = findInterceptorsOfPage(page)
-        // 遍历拦截器
-        for (interceptor in interceptorsOfPage) {
-            val uriBeforeIntercept = routeIntent.uri
-            interceptor.intercept(routeIntent)
-            if (uriBeforeIntercept != routeIntent.uri) {
-                page = routePages[routeIntent.path]
+        if (meta is CompassPage) {
+            // 若存在对应的页面, 则寻找 page 对应的拦截器
+            val interceptorsOfPage = findInterceptorsOfPage(meta)
+            // 遍历拦截器
+            for (interceptor in interceptorsOfPage) {
+                val uriBeforeIntercept = routeIntent.uri
+                interceptor.intercept(routeIntent)
+                if (uriBeforeIntercept != routeIntent.uri) {
+                    meta = routePages[routeIntent.path]
+                }
             }
         }
 
-        return performNavigate(context, page!!, routeIntent)
+        return performNavigate(context, meta!!, routeIntent)
     }
 
     private fun performNavigate(
         context: Any,
-        page: CompassPage,
+        meta: CompassMeta,
         routeIntent: ProcessableIntent
-    ): Any? = when (page.type) {
+    ): Any? = when (meta.type) {
         TargetType.ACTIVITY -> {
+            meta as CompassPage
+
             val activity = context.asActivity()
-            val intent = Intent(activity, page.target)
+            val intent = Intent(activity, meta.target)
             if (routeIntent.innerBundle != null) {
                 intent.putExtras(routeIntent.innerBundle!!)
             }
 
-            if (page.requestCode == 0) {
+            if (meta.requestCode == 0) {
                 ActivityCompat.startActivity(activity, intent, routeIntent.options)
             } else {
                 val fragment = context.asFragment()
@@ -126,32 +133,49 @@ object Compass {
                     ActivityCompat.startActivityForResult(
                         activity,
                         intent,
-                        page.requestCode,
+                        meta.requestCode,
                         routeIntent.options
                     )
                 } else {
-                    fragment.startActivityForResult(intent, page.requestCode, routeIntent.options)
+                    fragment.startActivityForResult(intent, meta.requestCode, routeIntent.options)
                 }
             }
         }
         TargetType.FRAGMENT -> {
-            val fragment = page.target.getConstructor().newInstance() as Fragment
+            meta as CompassPage
+
+            var constructor = cachedFragmentConstructor[meta]
+            if (constructor == null) {
+                constructor = meta.target.getConstructor()
+                cachedFragmentConstructor.put(meta, constructor)
+            }
+            val fragment = constructor!!.newInstance() as Fragment
             fragment.arguments = routeIntent.innerBundle
             fragment
+        }
+        TargetType.ECHO -> {
+            meta as CompassEcho
+            var block = cachedBlock[meta]
+            if (block == null) {
+                block = meta.target.getConstructor().newInstance() as IRouteEcho
+                block.init(context.asContext())
+            }
+            block.run(context.asContext(), routeIntent.innerBundle)
+            block
         }
         else -> null
     }
 
-    private fun findInterceptorsOfPage(page: CompassPage): List<RouteInterceptor> {
+    private fun findInterceptorsOfPage(page: CompassPage): List<IRouteInterceptor> {
         if (page.interceptors.isEmpty() || routeInterceptors.isEmpty()) {
             return emptyList()
         }
 
-        val definedInterceptorClzList = Arrays.asList(*page.interceptors)
+        val definedInterceptorClzList = listOf(*page.interceptors)
         val interceptorInstanceList = ArrayList(routeInterceptors)
 
         val definedInterceptorInstanceList =
-            ArrayList<RouteInterceptor>(definedInterceptorClzList.size)
+            ArrayList<IRouteInterceptor>(definedInterceptorClzList.size)
 
         definedInterceptorClzList.forEachIndexed { index, clz ->
             val i = interceptorInstanceList.firstOrNull { it::class.java == clz }
@@ -164,14 +188,22 @@ object Compass {
     }
 
     private fun Any.asActivity(): Activity {
-        return when {
-            this is Activity -> this
-            this is Fragment -> requireActivity()
-            else -> throw RuntimeException("$this can't cast to context.")
+        return when (this) {
+            is Activity -> this
+            is Fragment -> requireActivity()
+            else -> throw RuntimeException("$this can't cast to activity.")
         }
     }
 
     private fun Any.asFragment(): Fragment? {
         return this as? Fragment
+    }
+
+    private fun Any.asContext(): Context {
+        return when (this) {
+            is Activity -> this
+            is Fragment -> requireContext()
+            else -> throw RuntimeException("$this can't cast to context.")
+        }
     }
 }
