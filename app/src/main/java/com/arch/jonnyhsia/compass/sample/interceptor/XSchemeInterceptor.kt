@@ -2,8 +2,8 @@ package com.arch.jonnyhsia.compass.sample.interceptor
 
 import android.net.Uri
 import com.arch.jonnyhsia.compass.Compass
-import com.arch.jonnyhsia.compass.ProcessableIntent
-import com.arch.jonnyhsia.compass.interceptor.SchemeInterceptor
+import com.arch.jonnyhsia.compass.facade.ProcessableIntent
+import com.arch.jonnyhsia.compass.facade.SchemeInterceptor
 
 object XSchemeInterceptor : SchemeInterceptor {
 

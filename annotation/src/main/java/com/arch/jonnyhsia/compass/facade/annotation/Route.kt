@@ -1,4 +1,4 @@
-package com.arch.jonnyhsia.compass.api
+package com.arch.jonnyhsia.compass.facade.annotation
 
 import kotlin.reflect.KClass
 

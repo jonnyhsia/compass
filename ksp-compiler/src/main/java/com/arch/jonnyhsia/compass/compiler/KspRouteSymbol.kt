@@ -1,9 +1,8 @@
 package com.arch.jonnyhsia.compass.compiler
 
-import com.arch.jonnyhsia.compass.api.Route
-import com.arch.jonnyhsia.compass.api.TargetType
+import com.arch.jonnyhsia.compass.facade.annotation.Route
+import com.arch.jonnyhsia.compass.facade.enums.TargetType
 import com.google.devtools.ksp.KspExperimental
-import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName

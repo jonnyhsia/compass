@@ -1,6 +1,6 @@
 package com.arch.jonnyhsia.compass.compiler
 
-import com.arch.jonnyhsia.compass.api.Route
+import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.squareup.javapoet.ClassName
 import javax.lang.model.element.TypeElement
 
@@ -22,7 +22,7 @@ class RouteInfo(
     val interceptors: List<ClassName>
         get() {
             // com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor
-            // @com.arch.jonnyhsia.compass.api.Route(requestCode=11, interceptors=com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor, scheme=, name=sample://Subscribe)
+            // @com.arch.jonnyhsia.compass.api.annotation.Route(requestCode=11, interceptors=com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor, scheme=, name=sample://Subscribe)
             val s = route.toString().substringAfter("interceptors=")
             // com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor, scheme=, name=sample://Subscribe)
             val start = 0

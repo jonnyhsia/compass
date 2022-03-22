@@ -5,6 +5,7 @@ package com.arch.jonnyhsia.compass
 import android.app.Activity
 import android.net.Uri
 import androidx.fragment.app.Fragment
+import com.arch.jonnyhsia.compass.facade.RouteIntent
 
 inline fun Activity.navigate(url: String, block: RouteIntent.() -> Unit = {}) {
     Compass.navigate(url)

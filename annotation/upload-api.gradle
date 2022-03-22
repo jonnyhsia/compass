@@ -19,7 +19,7 @@ afterEvaluate {
                 // Applies the component for the release build variant.
                 from components.java
                 groupId = 'com.arch.jonnyhsia'
-                artifactId = 'compass-api'
+                artifactId = 'compass-annotation'
                 version = rootProject.pomVersion
                 artifact generateSourcesJar
             }
