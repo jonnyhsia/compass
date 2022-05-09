@@ -1,5 +1,6 @@
 package com.arch.jonnyhsia.compass.sample.interceptor
 
+import android.content.Context
 import android.net.Uri
 import com.arch.jonnyhsia.compass.Compass
 import com.arch.jonnyhsia.compass.facade.ProcessableIntent
@@ -7,7 +8,7 @@ import com.arch.jonnyhsia.compass.facade.SchemeInterceptor
 
 object XSchemeInterceptor : SchemeInterceptor {
 
-    override fun intercept(intent: ProcessableIntent) {
+    override fun intercept(context: Context, intent: ProcessableIntent) {
         val scheme = intent.uri.scheme
         if ("http" == scheme || "https" == scheme) {
             // 是内嵌页

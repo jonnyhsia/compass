@@ -25,8 +25,13 @@ class ProcessableIntent internal constructor(
 
     internal constructor(url: String) : this(Uri.parse(url))
 
-    var uri: Uri = uri
-        private set
+    private var _uri: Uri? = uri
+
+    val uri: Uri
+        get() = _uri!!
+
+    val isCleared: Boolean
+        get() = _uri == null
 
     internal var innerBundle: Bundle? = null
         private set
@@ -41,7 +46,7 @@ class ProcessableIntent internal constructor(
         get() = context.toString()
 
     fun redirect(url: String): RouteIntent {
-        this.uri = Uri.parse(url)
+        this._uri = Uri.parse(url)
         return this
     }
 
@@ -49,7 +54,12 @@ class ProcessableIntent internal constructor(
      * 重定向
      */
     fun redirect(uri: Uri): RouteIntent {
-        this.uri = uri
+        this._uri = uri
+        return this
+    }
+
+    fun clear(): RouteIntent {
+        this._uri = null
         return this
     }
 
