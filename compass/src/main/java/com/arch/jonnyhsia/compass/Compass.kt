@@ -77,7 +77,10 @@ object Compass {
 
     internal fun internalNavigate(context: Any, routeIntent: ProcessableIntent): Any? {
         // 判断协议拦截 (拦截非原生页, 页面升级等)
-        schemeInterceptor?.intercept(routeIntent)
+        schemeInterceptor?.intercept(context.asContext(), routeIntent)
+        if (routeIntent.isCleared) {
+            return null
+        }
 
         // 寻找 url 对应的页面
         var meta = routePages[routeIntent.path]
@@ -85,7 +88,10 @@ object Compass {
         // 若页面未找到, 页面降级
         val uriBeforePageHandler = routeIntent.uri
         if (meta == null && pageHandler != null) {
-            pageHandler!!.intercept(routeIntent)
+            pageHandler!!.intercept(context.asContext(), routeIntent)
+            if (routeIntent.isCleared) {
+                return null
+            }
 
             // 如果 url 被 handle 了, 则需要更新 page 对象
             if (uriBeforePageHandler != routeIntent.uri) {
@@ -101,7 +107,10 @@ object Compass {
             // 遍历拦截器
             for (interceptor in interceptorsOfPage) {
                 val uriBeforeIntercept = routeIntent.uri
-                interceptor.intercept(routeIntent)
+                interceptor.intercept(context.asContext(), routeIntent)
+                if (routeIntent.isCleared) {
+                    return null
+                }
                 if (uriBeforeIntercept != routeIntent.uri) {
                     meta = routePages[routeIntent.path]
                 }
