@@ -13,6 +13,7 @@ import com.arch.jonnyhsia.compass.core.CompassRepo
 import com.arch.jonnyhsia.compass.core.InterceptCallback
 import com.arch.jonnyhsia.compass.facade.ICompassTable
 import com.arch.jonnyhsia.compass.facade.IRouteInterceptor
+import com.arch.jonnyhsia.compass.facade.PathReplacement
 import com.arch.jonnyhsia.compass.facade.ProcessableIntent
 import com.arch.jonnyhsia.compass.facade.RouteIntent
 import com.arch.jonnyhsia.compass.facade.SchemeRecognizer
@@ -41,17 +42,27 @@ object Compass {
     }
 
     @JvmStatic
-    fun navigate(url: String): RouteIntent {
-        return if (url.contains("://")) {
-            ProcessableIntent(url)
-        } else {
-            ProcessableIntent("://${url}")
-        }
+    fun navigate(path: String): RouteIntent {
+        val finalPath = CompassRepo.pathReplacement?.replaceString(path) ?: path
+        val group = extractGroup(finalPath)
+        return ProcessableIntent(path, group, Uri.parse(path))
     }
 
     @JvmStatic
     fun navigate(uri: Uri): RouteIntent {
-        return ProcessableIntent(uri)
+        val finalUri = CompassRepo.pathReplacement?.replaceUri(uri) ?: uri
+        val path = finalUri.path!!
+        val group = extractGroup(path)
+        return ProcessableIntent(path, group, uri)
+    }
+
+    private fun extractGroup(path: String): String {
+        val startIndex = 1
+        val endIndex = path.indexOf('/', startIndex)
+        if (endIndex == -1) {
+            return ""
+        }
+        return path.substring(startIndex, endIndex)
     }
 
     @JvmStatic
@@ -65,6 +76,11 @@ object Compass {
     }
 
     @JvmStatic
+    fun setPathReplacement(replacement: PathReplacement) {
+        CompassRepo.pathReplacement = replacement
+    }
+
+    @JvmStatic
     fun addRouteInterceptor(interceptor: IRouteInterceptor) {
         CompassRepo.routeInterceptors.add(interceptor)
     }
@@ -73,7 +89,7 @@ object Compass {
         CompassLogistics.complete(context.asContext(), routeIntent)
         if (!routeIntent.greenChannel) {
             CompassInterceptHandler.performIntercept(routeIntent, object : InterceptCallback {
-                override fun onContinue(intent: ProcessableIntent) {
+                override fun onContinue(intent: RouteIntent) {
                     performNavigate(context, routeIntent)
                 }
 

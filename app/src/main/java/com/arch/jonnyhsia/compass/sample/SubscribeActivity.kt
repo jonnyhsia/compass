@@ -7,7 +7,7 @@ import com.arch.jonnyhsia.compass.facade.annotation.Route
 const val REQUEST_SUBSCRIBE = 11
 
 @Route(
-    name = "Subscribe",
+    name = "/Subscribe",
     extras = RouteExtras.MEMBER_AND_LOGIN,
 )
 class SubscribeActivity : AppCompatActivity() {

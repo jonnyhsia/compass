@@ -21,10 +21,10 @@ class KspRouteSymbol(val symbol: KSClassDeclaration) {
         val name = routeAnnotation.name
         val scheme: String = routeAnnotation.scheme
         val extras = routeAnnotation.extras
-        route = Route(scheme, name, extras)
+        route = Route(scheme, name, extras, routeAnnotation.group)
     }
 
     override fun toString(): String {
-        return "name: ${route.name}"
+        return "name: ${route.name} group: ${route.group}"
     }
 }

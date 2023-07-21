@@ -1,6 +1,7 @@
 package com.arch.jonnyhsia.compass.core
 
 import com.arch.jonnyhsia.compass.facade.ProcessableIntent
+import com.arch.jonnyhsia.compass.facade.RouteIntent
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -44,12 +45,13 @@ object CompassInterceptHandler {
     ) : InterceptCallback {
         private var index = 0
 
-        override fun onContinue(intent: ProcessableIntent) {
+        override fun onContinue(intent: RouteIntent) {
             counter.countDown()
-            doIntercept(++index, intent, this)
+            doIntercept(++index, intent as ProcessableIntent, this)
         }
 
         override fun onInterrupt(exception: Exception?) {
+            intent.cancel()
             intent.tag = exception ?: RuntimeException("Interrupted")
             while (counter.count > 0) {
                 counter.countDown()
@@ -59,6 +61,6 @@ object CompassInterceptHandler {
 }
 
 interface InterceptCallback {
-    fun onContinue(intent: ProcessableIntent)
+    fun onContinue(intent: RouteIntent)
     fun onInterrupt(exception: Exception?)
 }

@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.arch.jonnyhsia.compass.navigate
 
-@Route(scheme = "*", name = "Login")
+@Route(scheme = "*", name = "/Login")
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

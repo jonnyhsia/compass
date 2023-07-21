@@ -7,13 +7,15 @@ abstract class CompassMeta {
     abstract val target: Class<*>
     abstract val type: Int
     abstract val extras: Int
+    abstract val group: String
 }
 
 class CompassEcho(
     override val name: String,
     override val target: Class<*>,
     override val type: Int = TargetType.UNKNOWN,
-    override val extras: Int
+    override val extras: Int,
+    override val group: String = ""
 ) : CompassMeta()
 
 
@@ -22,11 +24,5 @@ class CompassPage @JvmOverloads constructor(
     override val target: Class<*>,
     override val type: Int = TargetType.UNKNOWN,
     override val extras: Int,
-    val group: String = "",
-
-    @Deprecated(message = "RequestCode 应在路由跳转时单独设置")
-    val requestCode: Int = 0,
-
-    @Deprecated(message = "拦截器将用独立的注解以独立的表维护")
-    val interceptors: Array<Class<*>> = emptyArray()
+    override val group: String = "",
 ) : CompassMeta()

@@ -5,7 +5,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.arch.jonnyhsia.compass.facade.annotation.Route
 
-@Route(name = "Web")
+@Route(name = "/Web")
 class WebActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

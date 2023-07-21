@@ -5,5 +5,6 @@ package com.arch.jonnyhsia.compass.facade.annotation
 annotation class Route(
     val scheme: String = "",
     val name: String,
-    val extras: Int = 0
+    val extras: Int = 0,
+    val group: String = ""
 )

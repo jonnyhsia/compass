@@ -153,18 +153,19 @@ class CompassKspProcessor(
                     logger.warn("runnable")
                     // map[name] = CompassEcho(name, target, type, extras)
                     addStatement(
-                        "map[%S] = %T(%S, %T::class.java, %L, %L)",
+                        "map[%S] = %T(%S, %T::class.java, %L, %L, %S)",
                         symbol.route.name,
                         CompassEcho::class.java,
                         symbol.route.name,
                         symbol.target,
                         targetType,
-                        symbol.route.extras
+                        symbol.route.extras,
+                        symbol.route.group
                     )
                 }
 
                 else -> {
-                    logger.warn("page")
+                    logger.warn("page $symbol")
                     // map[name] = CompassPage(name, Target::class.java, TargetType, extras)
                     addStatement(
                         "map[%S] = %T(%S, %T::class.java, %L, %L, %S)",
@@ -174,7 +175,7 @@ class CompassKspProcessor(
                         symbol.target,
                         targetType,
                         symbol.route.extras,
-                        symbol.route.scheme
+                        symbol.route.group
                     )
                 }
             }

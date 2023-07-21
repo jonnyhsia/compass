@@ -8,8 +8,7 @@ import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.arch.jonnyhsia.compass.facade.annotation.RouteInterceptor
 import com.arch.jonnyhsia.compass.navigate
 
-@Route(name = "Main")
-@RouteInterceptor(name = "LoginInterceptor")
+@Route(name = "/Main")
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,24 +16,24 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         findViewById<View>(R.id.btnGoDetail).setOnClickListener {
-            navigate("sample://Detail") {
+            navigate("/Detail") {
                 addParameter("id", 100)
             }
         }
         findViewById<View>(R.id.btnGoMembersOnly).setOnClickListener {
-            Compass.navigate("://MembersOnly").go(this)
+            Compass.navigate("/MembersOnly").go(this)
         }
         findViewById<View>(R.id.btnWeb).setOnClickListener {
             navigate("https://jonnyhsia.com")
         }
         findViewById<View>(R.id.btnNativeWeb).setOnClickListener {
-            navigate("https://jonnyhsia.com?native_page=%3A%2F%2FDetail")
+            navigate("https://jonnyhsia.com?native_page=%2FDetail")
         }
         findViewById<View>(R.id.btnNotFound).setOnClickListener {
-            navigate("://ABCDEFG")
+            navigate("/ABCDEFG")
         }
         findViewById<View>(R.id.btnExpired).setOnClickListener {
-            navigate("://expired")
+            navigate("/expired")
         }
     }
 }

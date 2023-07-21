@@ -13,6 +13,7 @@ interface RouteIntent {
     val context: Context
     val path: String
     val group: String
+    val scheme: String?
 
     fun addParameter(key: String, value: String?): RouteIntent
     fun addParameter(key: String, value: Int): RouteIntent
@@ -23,12 +24,15 @@ interface RouteIntent {
     fun removeAllParameters(): RouteIntent
     fun go(context: Context): Any?
     fun go(fragment: Fragment): Any?
+    fun query(key: String): Any?
+    fun cancel()
 }
 
 class ProcessableIntent internal constructor(
-    uri: Uri
+    override val path: String,
+    override val group: String,
+    internal val rawUrl: Uri
 ) : RouteIntent {
-    internal constructor(url: String) : this(Uri.parse(url))
 
     private lateinit var caller: Any
 
@@ -39,22 +43,14 @@ class ProcessableIntent internal constructor(
             else -> throw RuntimeException()
         }
 
+    override val scheme: String?
+        get() = rawUrl.scheme
+
     override var extras: Int = 0
         internal set
 
-    private var _uri: Uri? = uri
-
-    val uri: Uri
-        get() = _uri!!
-
-    val isPathCleared: Boolean
-        get() = _uri == null
-
-    override val group: String
-        get() = uri.host!!
-
-    override val path: String
-        get() = uri.path!!
+    var isIntentCanceled = false
+        private set
 
     internal var arguments: Bundle? = null
 
@@ -70,27 +66,14 @@ class ProcessableIntent internal constructor(
     internal var greenChannel = false
         private set
 
-    fun redirect(uri: Uri): RouteIntent {
-        return ProcessableIntent(uri)
-    }
-
-    fun redirect(url: String): RouteIntent {
-        return ProcessableIntent(url)
-    }
-
-    fun clearPath() {
-        this._uri = null
-    }
-
-    fun clearAll() {
-        clearPath()
+    override fun cancel() {
+        isIntentCanceled = true
         arguments?.clear()
         arguments = null
         options = null
         target = null
         echo = null
         fragment = null
-        tag = null
         type = TargetType.UNKNOWN
     }
 
@@ -101,6 +84,18 @@ class ProcessableIntent internal constructor(
             arguments!!.putAll(bundle)
         }
         return this
+    }
+
+    override fun query(key: String): Any? {
+        var ret: Any?
+        if (arguments != null) {
+            ret = arguments!!.get(key)
+            if (ret != null) {
+                return ret
+            }
+        }
+        ret = rawUrl.getQueryParameter(key)
+        return ret
     }
 
     override fun addParameter(key: String, value: String?): RouteIntent {
