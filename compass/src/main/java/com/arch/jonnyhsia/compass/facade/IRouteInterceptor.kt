@@ -1,6 +1,7 @@
 package com.arch.jonnyhsia.compass.facade
 
 import android.content.Context
+import com.arch.jonnyhsia.compass.core.InterceptCallback
 
 /**
  * 原生页跳转拦截 (对应 @Route 注解中的 Interceptor)
@@ -9,5 +10,5 @@ import android.content.Context
  * 主要用于用户登录等条件拦截, 跳转到其他页面
  */
 interface IRouteInterceptor {
-    fun intercept(context: Context, intent: ProcessableIntent)
+    fun intercept(intent: ProcessableIntent, callback: InterceptCallback)
 }

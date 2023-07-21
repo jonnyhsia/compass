@@ -6,12 +6,20 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.fragment.app.Fragment
 import com.arch.jonnyhsia.compass.Compass
+import com.arch.jonnyhsia.compass.facade.enums.TargetType
 
 interface RouteIntent {
+    val extras: Int
+    val context: Context
+    val path: String
+    val group: String
+
     fun addParameter(key: String, value: String?): RouteIntent
     fun addParameter(key: String, value: Int): RouteIntent
     fun addParameter(key: String, parcelable: Parcelable): RouteIntent
     fun addParameters(bundle: Bundle): RouteIntent
+    fun options(bundle: Bundle): RouteIntent
+    fun arguments(): Bundle
     fun removeAllParameters(): RouteIntent
     fun go(context: Context): Any?
     fun go(fragment: Fragment): Any?
@@ -20,79 +28,117 @@ interface RouteIntent {
 class ProcessableIntent internal constructor(
     uri: Uri
 ) : RouteIntent {
-
-    private lateinit var context: Any
-
     internal constructor(url: String) : this(Uri.parse(url))
+
+    private lateinit var caller: Any
+
+    override val context: Context
+        get() = when (caller) {
+            is Context -> caller as Context
+            is Fragment -> (caller as Fragment).requireContext()
+            else -> throw RuntimeException()
+        }
+
+    override var extras: Int = 0
+        internal set
 
     private var _uri: Uri? = uri
 
     val uri: Uri
         get() = _uri!!
 
-    val isCleared: Boolean
+    val isPathCleared: Boolean
         get() = _uri == null
 
-    internal var innerBundle: Bundle? = null
-        private set
+    override val group: String
+        get() = uri.host!!
+
+    override val path: String
+        get() = uri.path!!
+
+    internal var arguments: Bundle? = null
 
     internal var options: Bundle? = null
         private set
 
-    val path: String
-        get() = uri.host!!
+    internal var requestCode = 0
+    internal var target: Class<*>? = null
+    internal var type: Int = TargetType.UNKNOWN
+    internal var echo: IRouteEcho? = null
+    internal var fragment: Fragment? = null
+    internal var tag: Any? = null
+    internal var greenChannel = false
+        private set
 
-    val requester: String
-        get() = context.toString()
+    fun redirect(uri: Uri): RouteIntent {
+        return ProcessableIntent(uri)
+    }
 
     fun redirect(url: String): RouteIntent {
-        this._uri = Uri.parse(url)
-        return this
+        return ProcessableIntent(url)
     }
 
-    /**
-     * 重定向
-     */
-    fun redirect(uri: Uri): RouteIntent {
-        this._uri = uri
-        return this
-    }
-
-    fun clear(): RouteIntent {
+    fun clearPath() {
         this._uri = null
-        return this
+    }
+
+    fun clearAll() {
+        clearPath()
+        arguments?.clear()
+        arguments = null
+        options = null
+        target = null
+        echo = null
+        fragment = null
+        tag = null
+        type = TargetType.UNKNOWN
     }
 
     override fun addParameters(bundle: Bundle): RouteIntent {
-        if (innerBundle == null) {
-            innerBundle = Bundle(bundle)
+        if (arguments == null) {
+            arguments = Bundle(bundle)
         } else {
-            innerBundle!!.putAll(bundle)
+            arguments!!.putAll(bundle)
         }
-
         return this
     }
 
     override fun addParameter(key: String, value: String?): RouteIntent {
-        bundle().putString(key, value)
+        arguments().putString(key, value)
         return this
     }
 
     override fun addParameter(key: String, value: Int): RouteIntent {
-        bundle().putInt(key, value)
-        return this
-    }
-
-    override fun removeAllParameters(): RouteIntent {
-        if (innerBundle != null) {
-            innerBundle!!.clear()
-        }
+        arguments().putInt(key, value)
         return this
     }
 
     override fun addParameter(key: String, parcelable: Parcelable): RouteIntent {
-        bundle().putParcelable(key, parcelable)
+        arguments().putParcelable(key, parcelable)
         return this
+    }
+
+    override fun removeAllParameters(): RouteIntent {
+        if (arguments != null) {
+            arguments?.clear()
+        }
+        return this
+    }
+
+    override fun arguments(): Bundle {
+        if (arguments == null) {
+            arguments = Bundle()
+        }
+        return arguments!!
+    }
+
+    override fun options(bundle: Bundle): RouteIntent {
+        this.options = bundle
+        return this
+    }
+
+    internal fun greenChannel() {
+        greenChannel = true
     }
 
     override fun go(context: Context): Any? {
@@ -104,20 +150,7 @@ class ProcessableIntent internal constructor(
     }
 
     private fun internalGo(any: Any): Any? {
-        this.context = any
-
-        for (key in uri.queryParameterNames) {
-            val value = uri.getQueryParameter(key)
-            bundle().putString(key, value)
-        }
-
+        this.caller = any
         return Compass.internalNavigate(context, this)
-    }
-
-    private fun bundle(): Bundle {
-        if (innerBundle == null) {
-            innerBundle = Bundle()
-        }
-        return innerBundle!!
     }
 }

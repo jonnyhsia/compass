@@ -1,8 +1,8 @@
 package com.arch.jonnyhsia.compass.facade.enums
 
-enum class TargetType(id: Int) {
-    UNKNOWN(id = -1),
-    ACTIVITY(id = 0),
-    FRAGMENT(id = 1),
-    ECHO(id = 2)
+object TargetType {
+    val UNKNOWN = -1
+    val ACTIVITY = 0
+    val FRAGMENT = 1
+    val ECHO = 2
 }

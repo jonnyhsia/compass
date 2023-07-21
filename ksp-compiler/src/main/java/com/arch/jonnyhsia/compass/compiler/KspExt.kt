@@ -9,7 +9,6 @@ import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName
 
 
@@ -35,7 +34,6 @@ internal fun KSType.unwrapTypeAlias(): KSType {
     }
 }
 
-@KotlinPoetKspPreview
 internal fun KSAnnotation.toAnnotationSpec(resolver: Resolver): AnnotationSpec {
     val element = annotationType.resolve().unwrapTypeAlias().declaration as KSClassDeclaration
     val builder = AnnotationSpec.builder(element.toClassName())
@@ -49,7 +47,6 @@ internal fun KSAnnotation.toAnnotationSpec(resolver: Resolver): AnnotationSpec {
     return builder.build()
 }
 
-@KotlinPoetKspPreview
 private fun addValueToBlock(value: Any, resolver: Resolver, member: CodeBlock.Builder) {
     when (value) {
         is List<*> -> {

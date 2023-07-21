@@ -135,52 +135,52 @@ public class CompassProcessor extends AbstractProcessor {
                 .addStatement("$T map = new $T<>()", pageMapType, HashMap.class);
 
         for (RouteInfo routeInfo : routeInfoList) {
-            TargetType targetType = getTargetTypeByRouteInfo(routeInfo);
-            getPagesMethod.addComment(routeInfo.getRouteString());
-            switch (targetType) {
-                case ACTIVITY:
-                case FRAGMENT:
-                    // map.put(Name, CompassPage)
-                    getPagesMethod.addCode(
-                            "map.put($S, new $T($S, $T.class, $T.$L, $S, $L",
-                            routeInfo.getName(),
-                            CompassPage.class,
-                            routeInfo.getName(),
-                            routeInfo.getTarget(),
-                            targetType.getClass(), targetType.name(),
-                            pageScheme(routeInfo.getScheme()),
-                            routeInfo.getRequestCode());
-
-                    if (routeInfo.getInterceptors().size() == 0) {
-                        getPagesMethod.addCode(", new $T[0]", Class.class);
-                    } else {
-                        getPagesMethod.addCode(", new $T[] {", Class.class);
-                        for (int i = 0; i < routeInfo.getInterceptors().size(); i++) {
-                            ClassName interceptorClz = routeInfo.getInterceptors().get(i);
-                            getPagesMethod.addCode("$T.class", interceptorClz);
-                            if (i != routeInfo.getInterceptors().size() - 1) {
-                                getPagesMethod.addCode(", ");
-                            }
-                        }
-                        getPagesMethod.addCode("}");
-                    }
-
-                    getPagesMethod.addStatement("));");
-                    break;
-                case ECHO:
-                    // map.put(Name, CompassEcho)
-                    getPagesMethod.addStatement(
-                            "map.put($S, new $T($S, $T.class, $T.$L)",
-                            routeInfo.getName(),
-                            CompassEcho.class,
-                            routeInfo.getName(),
-                            routeInfo.getTarget(),
-                            targetType.getClass(), targetType.name()
-                    );
-                    break;
-                case UNKNOWN:
-                    break;
-            }
+//            TargetType targetType = getTargetTypeByRouteInfo(routeInfo);
+//            getPagesMethod.addComment(routeInfo.getRouteString());
+//            switch (targetType) {
+//                case ACTIVITY:
+//                case FRAGMENT:
+//                    // map.put(Name, CompassPage)
+//                    getPagesMethod.addCode(
+//                            "map.put($S, new $T($S, $T.class, $T.$L, $S, $L",
+//                            routeInfo.getName(),
+//                            CompassPage.class,
+//                            routeInfo.getName(),
+//                            routeInfo.getTarget(),
+//                            targetType.getClass(), targetType.name(),
+//                            pageScheme(routeInfo.getScheme()),
+//                            routeInfo.getRequestCode());
+//
+//                    if (routeInfo.getInterceptors().size() == 0) {
+//                        getPagesMethod.addCode(", new $T[0]", Class.class);
+//                    } else {
+//                        getPagesMethod.addCode(", new $T[] {", Class.class);
+//                        for (int i = 0; i < routeInfo.getInterceptors().size(); i++) {
+//                            ClassName interceptorClz = routeInfo.getInterceptors().get(i);
+//                            getPagesMethod.addCode("$T.class", interceptorClz);
+//                            if (i != routeInfo.getInterceptors().size() - 1) {
+//                                getPagesMethod.addCode(", ");
+//                            }
+//                        }
+//                        getPagesMethod.addCode("}");
+//                    }
+//
+//                    getPagesMethod.addStatement("));");
+//                    break;
+//                case ECHO:
+//                    // map.put(Name, CompassEcho)
+//                    getPagesMethod.addStatement(
+//                            "map.put($S, new $T($S, $T.class, $T.$L)",
+//                            routeInfo.getName(),
+//                            CompassEcho.class,
+//                            routeInfo.getName(),
+//                            routeInfo.getTarget(),
+//                            targetType.getClass(), targetType.name()
+//                    );
+//                    break;
+//                case UNKNOWN:
+//                    break;
+//            }
         }
         // return map
         getPagesMethod.addStatement("return map");
@@ -197,14 +197,14 @@ public class CompassProcessor extends AbstractProcessor {
         javaFile.writeTo(filer);
     }
 
-    private TargetType getTargetTypeByRouteInfo(final RouteInfo routeInfo) {
-        if (typeUtils.isSubtype(routeInfo.getType(), typeActivity)) {
-            return TargetType.ACTIVITY;
-        } else if (typeUtils.isSubtype(routeInfo.getType(), typeFragment)) {
-            return TargetType.FRAGMENT;
-        }
-        return TargetType.UNKNOWN;
-    }
+//    private TargetType getTargetTypeByRouteInfo(final RouteInfo routeInfo) {
+//        if (typeUtils.isSubtype(routeInfo.getType(), typeActivity)) {
+//            return TargetType.ACTIVITY;
+//        } else if (typeUtils.isSubtype(routeInfo.getType(), typeFragment)) {
+//            return TargetType.FRAGMENT;
+//        }
+//        return TargetType.UNKNOWN;
+//    }
 
     private String pageScheme(String scheme) {
         return scheme.isEmpty() ? defaultScheme : scheme;
