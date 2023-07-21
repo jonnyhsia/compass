@@ -1,15 +1,17 @@
 package com.arch.jonnyhsia.compass.sample
 
 import android.os.Bundle
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.arch.jonnyhsia.compass.facade.annotation.Route
-import com.arch.jonnyhsia.compass.sample.interceptor.XLoginInterceptor
 
-@Route(name = "MembersOnly", extras = RouteExtras.LOGIN)
-class MembersOnlyActivity : AppCompatActivity() {
+@Route(name = "Web")
+class WebActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_only_for_members)
+        setContentView(TextView(this).apply {
+            text = intent.getStringExtra("url")
+        })
     }
 }

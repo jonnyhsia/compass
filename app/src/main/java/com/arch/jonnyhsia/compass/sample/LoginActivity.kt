@@ -3,21 +3,21 @@ package com.arch.jonnyhsia.compass.sample
 import android.app.Activity
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.arch.jonnyhsia.compass.navigate
-import kotlinx.android.synthetic.main.activity_login.*
 
-const val REQUEST_LOGIN = 10
-
-@Route(scheme = "*", name = "Login", requestCode = REQUEST_LOGIN)
+@Route(scheme = "*", name = "Login")
 class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("LoginTest", "onCreate")
         setContentView(R.layout.activity_login)
 
-        btnLogin.setOnClickListener {
+        findViewById<View>(R.id.btnLogin).setOnClickListener {
             App.INSTANCE.isLogin = true
 
             val pending = intent.getParcelableExtra<Uri>("pending")
@@ -25,5 +25,9 @@ class LoginActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK)
             finish()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
     }
 }

@@ -1,17 +1,16 @@
 plugins {
-    id("com.google.devtools.ksp").version("1.6.10-1.0.4")
+    id("com.google.devtools.ksp").version("1.8.20-1.0.11")
 }
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.arch.jonnyhsia.compass.sample"
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode rootProject.versionCode
         versionName rootProject.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -57,13 +56,11 @@ kapt {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 
-//    implementation "com.arch.jonnyhsia:compass:$pomVersion"
-//    ksp "com.arch.jonnyhsia:compass-compiler:$pomVersion"
-//    implementation project(path: ':test-processor')
-    implementation project(':compass')
+    implementation "com.arch.jonnyhsia:compass:$pomVersion"
+    ksp "com.arch.jonnyhsia:compass-compiler-ksp:$pomVersion"
+//    implementation project(':compass')
+//    ksp project(':ksp-compiler')
 //    kapt project(':compiler')
-    ksp project(':ksp-compiler')
-//    ksp project(':test-processor')
 }

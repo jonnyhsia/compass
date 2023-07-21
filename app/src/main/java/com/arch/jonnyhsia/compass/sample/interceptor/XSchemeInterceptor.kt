@@ -1,29 +1,21 @@
 package com.arch.jonnyhsia.compass.sample.interceptor
 
-import android.content.Context
-import android.net.Uri
-import com.arch.jonnyhsia.compass.Compass
 import com.arch.jonnyhsia.compass.facade.ProcessableIntent
-import com.arch.jonnyhsia.compass.facade.SchemeInterceptor
+import com.arch.jonnyhsia.compass.facade.SchemeRecognizer
 
-object XSchemeInterceptor : SchemeInterceptor {
+object XSchemeInterceptor : SchemeRecognizer {
 
-    override fun intercept(context: Context, intent: ProcessableIntent) {
+    override fun onRecognizeScheme(intent: ProcessableIntent) {
         val scheme = intent.uri.scheme
         if ("http" == scheme || "https" == scheme) {
-            // 是内嵌页
+            // 是否有可升级的 native 页面
             val nativePage: String? = intent.uri.getQueryParameter("native_page")
             if (nativePage != null) {
-                val uri = Uri.parse(nativePage)
-                val path = uri.host!!
-                // 如果页面能升级, 则前往对应原生页
-                if (Compass.validatePagePath(path)) {
-                    intent.redirect(nativePage)
-                    return
-                }
+                intent.redirect(nativePage)
+            } else {
+                val url = intent.uri.toString()
+                intent.redirect("://Web").addParameter("url", url)
             }
-
-            intent.redirect("core://Web").addParameter("url", intent.uri)
         }
     }
 }
