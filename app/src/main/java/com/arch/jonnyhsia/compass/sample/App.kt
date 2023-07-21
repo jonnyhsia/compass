@@ -21,7 +21,7 @@ class App : Application() {
 
     private fun setupRouter() {
         Compass.run {
-            initialize(SampleTable)
+            initialize(applicationContext, SampleTable)
             // 设置协议拦截器
             setSchemeInterceptor(XSchemeInterceptor)
             // 404 处理

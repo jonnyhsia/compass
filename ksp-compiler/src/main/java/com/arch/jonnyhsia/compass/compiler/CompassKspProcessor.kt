@@ -1,12 +1,13 @@
 package com.arch.jonnyhsia.compass.compiler
 
+import com.arch.jonnyhsia.compass.facade.CompassEcho
 import com.arch.jonnyhsia.compass.facade.CompassMeta
 import com.arch.jonnyhsia.compass.facade.CompassPage
-import com.arch.jonnyhsia.compass.facade.CompassEcho
 import com.arch.jonnyhsia.compass.facade.ICompassTable
 import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.arch.jonnyhsia.compass.facade.enums.TargetType
 import com.google.devtools.ksp.KspExperimental
+import com.google.devtools.ksp.containingFile
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
@@ -14,14 +15,19 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSType
-import com.squareup.kotlinpoet.*
+import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.FileSpec
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
+import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toTypeName
-import kotlin.concurrent.thread
 
-@KotlinPoetKspPreview
 @KspExperimental
 class CompassKspProcessor(
     environment: SymbolProcessorEnvironment
@@ -38,9 +44,7 @@ class CompassKspProcessor(
     private val tablePackage: String
     private val tableName: String
 
-    private val routeSymbols = ArrayList<KspRouteSymbol>()
-
-    private lateinit var dependencies: Dependencies
+//    private val routeSymbols = ArrayList<KspRouteSymbol>()
 
     init {
         val tableFullName = environment.options[TABLE_FULL_PATH]
@@ -60,6 +64,9 @@ class CompassKspProcessor(
     private lateinit var stringType: KSType
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        val symbols = resolver.getSymbolsWithAnnotation(ROUTE_NAME)
+        // val ret = symbols.filter { !it.validate() }.toList()
+
         stringType = resolver.builtIns.stringType
         blockType =
             resolver.getClassDeclarationByName("com.arch.jonnyhsia.compass.facade.IRouteEcho")!!
@@ -70,94 +77,105 @@ class CompassKspProcessor(
 
         logger.warn("Start processing...")
         logger.warn("getSymbolsWithAnnotation: $ROUTE_NAME")
-        val symbols = resolver.getSymbolsWithAnnotation(ROUTE_NAME)
 
-        dependencies = Dependencies(false, *resolver.getAllFiles().toList().toTypedArray())
-
-        symbols.forEach { type ->
-            if (type is KSClassDeclaration) {
-                routeSymbols.add(KspRouteSymbol(type))
-            } else {
-                logger.warn("$type is not class declaration")
+        val list = symbols
+            .onEach {
+                logger.warn("onEach: ${it.containingFile?.fileName}")
             }
-        }
-        logger.warn("Count: ${routeSymbols.size}")
+            .filterIsInstance<KSClassDeclaration>()
+            .map { declaration ->
+                KspRouteSymbol(declaration)
+            }
+            .toList()
+        generateCode(list)
+
+        logger.warn("Count: ${list.size}")
         return emptyList()
     }
 
     override fun finish() {
-        generateCode(routeSymbols)
         super.finish()
     }
 
     private fun generateCode(annotations: List<KspRouteSymbol>) {
-        thread {
-            val filename = tableName
-            codeGenerator.createNewFile(
-                dependencies = dependencies,
-                packageName = tablePackage,
-                fileName = filename,
-                extensionName = "kt"
-            ).writer().use { writer ->
-                val tableType = HashMap::class.asClassName().parameterizedBy(
-                    stringType.toTypeName(),
-                    CompassMeta::class.asTypeName()
-                )
-                logger.warn("hello: $annotations")
-                FileSpec.builder(tablePackage, filename)
-                    .addType(
-                        TypeSpec.objectBuilder(filename)
-                            .addSuperinterface(ICompassTable::class)
-                            .addFunction(
-                                FunSpec.builder("getPages")
-                                    .addModifiers(KModifier.OVERRIDE)
-                                    .returns(tableType)
-                                    .collectAllRoutesAndReturn(annotations, tableType)
-                                    .build()
-                            )
+        if (annotations.isEmpty()) {
+            logger.warn("No annotations found")
+            return
+        }
+
+        val ksFiles = ArrayList<KSFile>(annotations.size)
+        val filename = tableName
+        val tableType = HashMap::class.asClassName().parameterizedBy(
+            stringType.toTypeName(),
+            CompassMeta::class.asTypeName()
+        )
+        logger.warn("hello: $annotations")
+        val fileSpec = FileSpec.builder(tablePackage, filename)
+            .addType(
+                TypeSpec.objectBuilder(filename)
+                    .addSuperinterface(ICompassTable::class)
+                    .addFunction(
+                        FunSpec.builder("getPages")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .returns(tableType)
+                            .collectAllRoutesAndReturn(annotations, tableType, ksFiles)
                             .build()
                     )
                     .build()
-                    .writeTo(writer)
-            }
+            )
+            .build()
+
+        codeGenerator.createNewFile(
+            dependencies = Dependencies(true, *ksFiles.toTypedArray()),
+            packageName = tablePackage,
+            fileName = filename,
+            extensionName = "kt"
+        ).writer().use { writer ->
+            fileSpec.writeTo(writer)
         }
     }
 
     private fun FunSpec.Builder.collectAllRoutesAndReturn(
         symbols: List<KspRouteSymbol>,
-        tableType: ParameterizedTypeName
+        tableType: ParameterizedTypeName,
+        ksFiles: ArrayList<KSFile>
     ): FunSpec.Builder {
-        logger.warn("hello222")
         addComment("Read routes(${symbols.size}) from annotations and generate router map")
         // val map = HashMap<String, CompassMeta>()
         addStatement("val map = %T()", tableType)
 
         for (symbol in symbols) {
+            symbol.symbol.containingFile?.let {
+                ksFiles.add(it)
+            }
             when (val targetType = getTargetType(symbol)) {
                 TargetType.ECHO -> {
                     logger.warn("runnable")
-                    // map[name] = CompassRunnable(name, Target::class.java, TargetType.RUNNABLE
+                    // map[name] = CompassEcho(name, target, type, extras)
                     addStatement(
-                        "map[%S] = %T(%S, %T::class.java, %T.%L)",
+                        "map[%S] = %T(%S, %T::class.java, %L, %L, %S)",
                         symbol.route.name,
                         CompassEcho::class.java,
                         symbol.route.name,
                         symbol.target,
-                        targetType::class.java, targetType.name
+                        targetType,
+                        symbol.route.extras,
+                        symbol.route.group
                     )
                 }
+
                 else -> {
-                    logger.warn("page")
-                    // map[name] = CompassRunnable(name, Target::class.java, TargetType,
+                    logger.warn("page $symbol")
+                    // map[name] = CompassPage(name, Target::class.java, TargetType, extras)
                     addStatement(
-                        "map[%S] = %T(%S, %T::class.java, %T.%L, %S, %L)",
+                        "map[%S] = %T(%S, %T::class.java, %L, %L, %S)",
                         symbol.route.name,
                         CompassPage::class.java,
                         symbol.route.name,
                         symbol.target,
-                        targetType::class.java, targetType.name,
-                        symbol.route.scheme,
-                        symbol.route.requestCode
+                        targetType,
+                        symbol.route.extras,
+                        symbol.route.group
                     )
                 }
             }
@@ -166,7 +184,7 @@ class CompassKspProcessor(
         return this
     }
 
-    private fun getTargetType(symbol: KspRouteSymbol): TargetType {
+    private fun getTargetType(symbol: KspRouteSymbol): Int {
         return when {
             activityType.isAssignableFrom(symbol.targetKsType) -> TargetType.ACTIVITY
             fragmentType.isAssignableFrom(symbol.targetKsType) -> TargetType.FRAGMENT

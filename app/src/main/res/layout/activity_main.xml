@@ -30,4 +30,32 @@
         android:layout_marginTop="20dp"
         android:text="@string/go_members_only_button_text" />
 
+    <Button
+        android:id="@+id/btnNotFound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="去不存在的页面" />
+
+    <Button
+        android:id="@+id/btnWeb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="去网页" />
+
+    <Button
+        android:id="@+id/btnNativeWeb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="去网页可升级 Native 页面" />
+
+    <Button
+        android:id="@+id/btnExpired"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="登录失效" />
+
 </LinearLayout>

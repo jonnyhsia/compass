@@ -1,12 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.6.10'
-    ext.versionCode = 4
-    ext.versionName = '2.1.0'
-    ext.compileSdkVersion = 30
-    ext.targetSdkVersion = 30
-    ext.minSdkVersion = 21
+    ext.kotlin_version = '1.8.20'
+    ext.versionCode = 5
+    ext.versionName = '2.3.0'
     ext.stable = false
     ext.pomVersion = stable ? versionName : (versionName + '-SNAPSHOT')
 

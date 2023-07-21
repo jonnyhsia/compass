@@ -1,5 +1,7 @@
 package com.arch.jonnyhsia.compass.facade
 
+import com.arch.jonnyhsia.compass.core.InterceptCallback
+
 /**
  * 原生页跳转拦截 (对应 @Route 注解中的 Interceptor)
  * 优先级: 低
@@ -7,5 +9,5 @@ package com.arch.jonnyhsia.compass.facade
  * 主要用于用户登录等条件拦截, 跳转到其他页面
  */
 interface IRouteInterceptor {
-    fun intercept(intent: ProcessableIntent)
+    fun intercept(intent: RouteIntent, callback: InterceptCallback)
 }

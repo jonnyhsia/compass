@@ -4,13 +4,11 @@ import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.arch.jonnyhsia.compass.facade.enums.TargetType
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName
 import kotlin.reflect.KClass
 
-@KotlinPoetKspPreview
 @KspExperimental
-class KspRouteSymbol(symbol: KSClassDeclaration) {
+class KspRouteSymbol(val symbol: KSClassDeclaration) {
 
     val route: Route
 
@@ -22,12 +20,11 @@ class KspRouteSymbol(symbol: KSClassDeclaration) {
 
         val name = routeAnnotation.name
         val scheme: String = routeAnnotation.scheme
-        val interceptors: Array<KClass<*>>? = null
-        val requestCode: Int = routeAnnotation.requestCode
-        route = Route(scheme, name, interceptors ?: emptyArray(), requestCode)
+        val extras = routeAnnotation.extras
+        route = Route(scheme, name, extras, routeAnnotation.group)
     }
 
     override fun toString(): String {
-        return "name: ${route.name}"
+        return "name: ${route.name} group: ${route.group}"
     }
 }

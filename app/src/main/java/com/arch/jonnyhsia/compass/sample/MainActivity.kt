@@ -1,33 +1,39 @@
 package com.arch.jonnyhsia.compass.sample
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.arch.jonnyhsia.compass.Compass
 import com.arch.jonnyhsia.compass.facade.annotation.Route
 import com.arch.jonnyhsia.compass.facade.annotation.RouteInterceptor
 import com.arch.jonnyhsia.compass.navigate
-import kotlinx.android.synthetic.main.activity_main.*
 
-@Route(name = "Main")
-@RouteInterceptor(name = "LoginInterceptor")
+@Route(name = "/Main")
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        btnGoDetail.setOnClickListener {
-            // Compass.navigate(this, "sample://Detail")
-            //     .addParameter("id", 100)
-            //     .go()
-
-            navigate("sample://Detail") {
+        findViewById<View>(R.id.btnGoDetail).setOnClickListener {
+            navigate("/Detail") {
                 addParameter("id", 100)
             }
         }
-
-        btnGoMembersOnly.setOnClickListener {
-            Compass.navigate("expired").go(this)
+        findViewById<View>(R.id.btnGoMembersOnly).setOnClickListener {
+            Compass.navigate("/MembersOnly").go(this)
+        }
+        findViewById<View>(R.id.btnWeb).setOnClickListener {
+            navigate("https://jonnyhsia.com")
+        }
+        findViewById<View>(R.id.btnNativeWeb).setOnClickListener {
+            navigate("https://jonnyhsia.com?native_page=%2FDetail")
+        }
+        findViewById<View>(R.id.btnNotFound).setOnClickListener {
+            navigate("/ABCDEFG")
+        }
+        findViewById<View>(R.id.btnExpired).setOnClickListener {
+            navigate("/expired")
         }
     }
 }

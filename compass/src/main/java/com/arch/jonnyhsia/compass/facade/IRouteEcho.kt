@@ -5,9 +5,6 @@ import android.os.Bundle
 
 interface IRouteEcho {
 
-    fun init(context: Context) {
-    }
-
     /**
      * 默认调用方法, 也可以自定义方法通过对 Compass 的返回值进行显式调用
      */

@@ -1,12 +1,10 @@
 package com.arch.jonnyhsia.compass.facade.annotation
 
-import kotlin.reflect.KClass
-
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
 @Retention(AnnotationRetention.BINARY)
 annotation class Route(
     val scheme: String = "",
     val name: String,
-    val interceptors: Array<KClass<*>> = [],
-    val requestCode: Int = -1
+    val extras: Int = 0,
+    val group: String = ""
 )
