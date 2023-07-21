@@ -4,12 +4,13 @@ apply from: './upload-compiler.gradle'
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.google.devtools.ksp:symbol-processing-api:1.6.10-1.0.4'
+    implementation 'com.google.devtools.ksp:symbol-processing-api:1.8.20-1.0.11'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'com.squareup:kotlinpoet:1.10.2'
-    implementation 'com.squareup:kotlinpoet-ksp:1.10.2'
-    implementation project(':annotation')
+    implementation 'com.squareup:kotlinpoet:1.12.0'
+    implementation 'com.squareup:kotlinpoet-ksp:1.12.0'
+//    implementation project(':annotation')
+    implementation "com.arch.jonnyhsia:compass-annotation:$pomVersion"
     //    implementation "com.arch.jonnyhsia:compass-api:$pomVersion"
 }
 
