@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.app.ActivityCompat
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.arch.jonnyhsia.compass.core.CompassExecutor
 import com.arch.jonnyhsia.compass.core.CompassInterceptHandler
@@ -45,7 +46,8 @@ object Compass {
     fun navigate(path: String): RouteIntent {
         val finalPath = CompassRepo.pathReplacement?.replaceString(path) ?: path
         val group = extractGroup(finalPath)
-        return ProcessableIntent(path, group, Uri.parse(path))
+        val uri = finalPath.toUri()
+        return ProcessableIntent(uri.path!!, group, uri)
     }
 
     @JvmStatic
@@ -53,7 +55,7 @@ object Compass {
         val finalUri = CompassRepo.pathReplacement?.replaceUri(uri) ?: uri
         val path = finalUri.path!!
         val group = extractGroup(path)
-        return ProcessableIntent(path, group, uri)
+        return ProcessableIntent(path, group, finalUri)
     }
 
     private fun extractGroup(path: String): String {

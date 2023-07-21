@@ -13,7 +13,7 @@ interface RouteIntent {
     val context: Context
     val path: String
     val group: String
-    val scheme: String?
+    val rawUri: Uri
 
     fun addParameter(key: String, value: String?): RouteIntent
     fun addParameter(key: String, value: Int): RouteIntent
@@ -31,7 +31,7 @@ interface RouteIntent {
 class ProcessableIntent internal constructor(
     override val path: String,
     override val group: String,
-    internal val rawUrl: Uri
+    override val rawUri: Uri
 ) : RouteIntent {
 
     private lateinit var caller: Any
@@ -42,9 +42,6 @@ class ProcessableIntent internal constructor(
             is Fragment -> (caller as Fragment).requireContext()
             else -> throw RuntimeException()
         }
-
-    override val scheme: String?
-        get() = rawUrl.scheme
 
     override var extras: Int = 0
         internal set
@@ -94,7 +91,7 @@ class ProcessableIntent internal constructor(
                 return ret
             }
         }
-        ret = rawUrl.getQueryParameter(key)
+        ret = rawUri.getQueryParameter(key)
         return ret
     }
 

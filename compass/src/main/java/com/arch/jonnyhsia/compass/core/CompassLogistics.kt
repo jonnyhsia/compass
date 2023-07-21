@@ -49,7 +49,7 @@ object CompassLogistics {
             intent.type = meta.type
             intent.extras = meta.extras
 
-            val uri = intent.rawUrl
+            val uri = intent.rawUri
             for (key in uri.queryParameterNames) {
                 val value = uri.getQueryParameter(key)
                 intent.addParameter(key, value)
