@@ -35,9 +35,12 @@ object Compass {
      */
     @JvmStatic
     @Synchronized
-    fun initialize(context: Context, table: ICompassTable) {
+    fun initialize(context: Context, vararg tables: ICompassTable) {
         if (initialized.compareAndSet(false, true)) {
-            CompassRepo.installPages(table)
+            // TODO: jonny 23/8/21 后续改为自动注入路由表
+            for (table in tables) {
+                CompassRepo.installPages(table)
+            }
             CompassLogistics.init(context, executor)
         }
     }
